@@ -16,7 +16,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jtk.android.taekyonclaude.ui.theme.TaekyonClaudeTheme
-import com.unity3d.player.UnityPlayer
 import com.unity3d.player.UnityPlayerGameActivity
 import kotlinx.coroutines.delay
 
@@ -37,8 +36,7 @@ class MainActivity : UnityPlayerGameActivity() {
                     TaekyonClaudeTheme {
                         TrainingOverlay(
                             durationSeconds = durationSeconds,
-                            unityReady = _unityReady.value,
-                            onSendMotion = { clipName -> sendMotion(clipName) }
+                            unityReady = _unityReady.value
                         )
                     }
                 }
@@ -61,13 +59,6 @@ class MainActivity : UnityPlayerGameActivity() {
         finish()
     }
 
-    // TEST ONLY — send a named motion clip to Unity
-    private fun sendMotion(clipName: String) {
-        val json = assets.open("motions/$clipName.json")
-            .bufferedReader().use { it.readText() }
-        UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)
-    }
-
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             navigateBack()
@@ -77,7 +68,7 @@ class MainActivity : UnityPlayerGameActivity() {
     }
 
     @Composable
-    private fun TrainingOverlay(durationSeconds: Int, unityReady: Boolean, onSendMotion: (String) -> Unit = {}) {
+    private fun TrainingOverlay(durationSeconds: Int, unityReady: Boolean) {
         var remainingSeconds by remember { mutableIntStateOf(durationSeconds) }
 
         LaunchedEffect(unityReady) {
@@ -125,14 +116,6 @@ class MainActivity : UnityPlayerGameActivity() {
                     color = Color.White.copy(alpha = 0.80f)
                 )
             }
-
-            // TEST: blend trigger button — remove before Milestone 4
-            Button(
-                onClick = { onSendMotion("test_motion") },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 32.dp)
-            ) { Text("Test Motion") }
 
             // Training-over overlay
             if (done) {

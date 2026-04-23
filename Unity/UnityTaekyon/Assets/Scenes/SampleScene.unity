@@ -397,6 +397,7 @@ GameObject:
   - component: {fileID: 544687603}
   - component: {fileID: 544687602}
   - component: {fileID: 544687607}
+  - component: {fileID: 544687608}
   m_Layer: 0
   m_Name: AndroidBridge
   m_TagString: Untagged
@@ -416,7 +417,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e48344612116d143afe9dec8a514313, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MotionTimeController
-  sampleClip: {fileID: 4900000, guid: 858a610b5e5ced24187c4da0af14cdcf, type: 3}
 --- !u!114 &544687603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,6 +470,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a004c2541d7e574fa9d9d68011ee233, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::AndroidBridge
+--- !u!114 &544687608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 544687601}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd1e2d3c4b5a697800b9c0d1e2f30004, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MotionStateMachine
+  neutralClip: {fileID: 4900000, guid: fd1e2d3c4b5a697800b9c0d1e2f30005, type: 3}
+  leftStepClip: {fileID: 4900000, guid: fd1e2d3c4b5a697800b9c0d1e2f30006, type: 3}
+  rightStepClip: {fileID: 4900000, guid: fd1e2d3c4b5a697800b9c0d1e2f30007, type: 3}
+  leftKickClip: {fileID: 0}
+  rightKickClip: {fileID: 0}
+  minStepInterval: 1.5
+  maxStepInterval: 3
+  kickProbability: 0.3
 --- !u!4 &544687606
 Transform:
   m_ObjectHideFlags: 0

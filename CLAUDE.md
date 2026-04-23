@@ -51,21 +51,24 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 2 — Android in Control | AndroidBridge + Android UI sends JSON to Unity | ✅ Done |
 | 2.5 — Post-M2 Polish | Timer delay, back button, skeleton shader fix, dual-app install fix | ✅ Done |
 | 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ✅ Done |
-| 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ⬜ |
+| 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ✅ Done |
 | 5 — Polish | Timing, anticipation, flow refinement | ⬜ |
 
 ## Current Status
 
-**Milestone 3 complete.** Motion blending shipped:
-- `MotionPlayer` captures live pose on `Load()` and LERPs to new clip over `blendDuration` (default 0.25s, tweakable in Inspector)
-- Blend runs "underneath" — new clip advances during blend so no jump when it completes
-- First load (startup) bypasses blend; `Stop()` also clears blend state
-- `JointMat` (URP Lit) and `BoneMat` (URP Unlit) material assets created and wired into scene
-- `AndroidBridge` scene GameObject renamed to `"AndroidBridge"` (required by `UnitySendMessage`)
-- Android test button sends `test_motion.json` (same file as Unity `sampleClip`) to verify blending
-- Exit/back/✕ all navigate back to `LauncherActivity` via `FLAG_ACTIVITY_CLEAR_TOP` (prevents Unity process kill from closing the whole app)
+**Milestone 4 complete.** Fighter's Rhythm shipped:
+- `MotionStateMachine.cs` — autonomous state machine on the `AndroidBridge` GameObject
+  - States: `Neutral → SteppingLeft/Right → (KickingLeft/Right) → Neutral`
+  - Neutral loops `neutral_idle` and fires a random step after 1.5–3s
+  - Step clips play non-looping; on end, small kick probability check (kick clips null for now → always returns to Neutral)
+  - All transitions logged: `"MotionStateMachine: Neutral → SteppingLeft"` etc.
+- `MotionTimeController.cs` stripped to just `Tick()` + `OnFrameReady` subscription; no sampleClip
+- All three motion clips X-axis fixed (left side = negative X, matching `test_motion.json` convention)
+  - `neutral_idle.json`, `left_step.json`, `right_step.json` updated in both Android assets and Unity SampleMotions
+- Android "Test Motion" button removed; state machine is fully autonomous
+- Scene wired: `MotionStateMachine` component added to `AndroidBridge` GameObject with `neutralClip`, `leftStepClip`, `rightStepClip` assigned
 
-**Next:** Milestone 4 — Fighter's Rhythm (state machine + autonomous step loop + kicks).
+**Next:** Milestone 5 — Polish (timing, anticipation, flow refinement).
 
 ## Non-Goals
 
