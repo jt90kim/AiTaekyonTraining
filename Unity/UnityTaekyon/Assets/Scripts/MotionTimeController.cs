@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MotionTimeController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class MotionTimeController : MonoBehaviour
     private void Awake()
     {
         _player = GetComponent<MotionPlayer>();
+        _mapper  = GetComponent<SkeletonMapper>();
         _mapper  = GetComponent<SkeletonMapper>();
         Debug.Log($"MotionTimeController.Awake: player={(_player == null ? "NULL" : "OK")}, mapper={(_mapper == null ? "NULL" : "OK")}");
     }
@@ -42,5 +44,12 @@ public class MotionTimeController : MonoBehaviour
     private void Update()
     {
         _player.Tick(Time.deltaTime);
+        // TODO: Temporary, remove this later
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        {
+            MotionClip clip = MotionLoader.Load(sampleClip.text);
+            _player.Load(clip);
+            _player.Play(loop: true);
+        }
     }
 }

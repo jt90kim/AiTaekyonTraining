@@ -5,15 +5,32 @@ public class MotionPlayer : MonoBehaviour
 {
     public event Action<MotionFrame> OnFrameReady;
 
+    [SerializeField] private float blendDuration = 0.25f;
+
     private MotionClip _clip;
     private float _time;
     private bool _isPlaying;
     private bool _loop;
 
+    private MotionFrame _blendFrom;
+    private float _blendTime;
+    private bool _isBlending;
+
     public bool IsPlaying => _isPlaying;
 
     public void Load(MotionClip clip)
     {
+        if (_isPlaying && _clip != null && _clip.frames.Length > 0)
+        {
+            _blendFrom = GetInterpolatedFrame(_time);
+            _blendTime = 0f;
+            _isBlending = true;
+        }
+        else
+        {
+            _isBlending = false;
+        }
+
         _clip = clip;
         _time = 0f;
         _isPlaying = false;
@@ -31,6 +48,7 @@ public class MotionPlayer : MonoBehaviour
     public void Stop()
     {
         _isPlaying = false;
+        _isBlending = false;
         _time = 0f;
     }
 
@@ -52,7 +70,17 @@ public class MotionPlayer : MonoBehaviour
             }
         }
 
-        OnFrameReady?.Invoke(GetInterpolatedFrame(_time));
+        MotionFrame frame = GetInterpolatedFrame(_time);
+
+        if (_isBlending)
+        {
+            _blendTime += deltaTime;
+            float t = Mathf.Clamp01(_blendTime / blendDuration);
+            frame = Lerp(_blendFrom, frame, t);
+            if (t >= 1f) _isBlending = false;
+        }
+
+        OnFrameReady?.Invoke(frame);
     }
 
     private MotionFrame GetInterpolatedFrame(float time)

@@ -50,20 +50,22 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 1 — Hello Skeleton | MotionClip, MotionLoader, MotionPlayer, SkeletonMapper, DebugSkeletonRenderer | ✅ Done |
 | 2 — Android in Control | AndroidBridge + Android UI sends JSON to Unity | ✅ Done |
 | 2.5 — Post-M2 Polish | Timer delay, back button, skeleton shader fix, dual-app install fix | ✅ Done |
-| 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ⬜ |
+| 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ✅ Done |
 | 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ⬜ |
 | 5 — Polish | Timing, anticipation, flow refinement | ⬜ |
 
 ## Current Status
 
-**Milestone 2.5 complete.** Post-M2 bug fixes shipped:
-- Timer waits for Unity scene-ready signal (`AndroidBridge` → `onUnitySceneReady()` JNI callback)
-- Back button and `✕` overlay button both exit the training activity cleanly
-- Skeleton renders on Android (Inspector-serialized `Material` templates replace `Shader.Find()`)
-- Single app install (Unity launcher activities suppressed via `tools:node="remove"` in manifest)
-- `AndroidBridge` component added to `MotionSystem` scene GameObject
+**Milestone 3 complete.** Motion blending shipped:
+- `MotionPlayer` captures live pose on `Load()` and LERPs to new clip over `blendDuration` (default 0.25s, tweakable in Inspector)
+- Blend runs "underneath" — new clip advances during blend so no jump when it completes
+- First load (startup) bypasses blend; `Stop()` also clears blend state
+- `JointMat` (URP Lit) and `BoneMat` (URP Unlit) material assets created and wired into scene
+- `AndroidBridge` scene GameObject renamed to `"AndroidBridge"` (required by `UnitySendMessage`)
+- Android test button sends `test_motion.json` (same file as Unity `sampleClip`) to verify blending
+- Exit/back/✕ all navigate back to `LauncherActivity` via `FLAG_ACTIVITY_CLEAR_TOP` (prevents Unity process kill from closing the whole app)
 
-**Next:** Milestone 3 — motion blending (0.2–0.4s LERP between clips) in Unity.
+**Next:** Milestone 4 — Fighter's Rhythm (state machine + autonomous step loop + kicks).
 
 ## Non-Goals
 

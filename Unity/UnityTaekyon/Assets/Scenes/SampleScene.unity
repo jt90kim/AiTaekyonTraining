@@ -398,7 +398,7 @@ GameObject:
   - component: {fileID: 544687602}
   - component: {fileID: 544687607}
   m_Layer: 0
-  m_Name: MotionSystem
+  m_Name: AndroidBridge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -432,6 +432,8 @@ MonoBehaviour:
   mapper: {fileID: 0}
   jointRadius: 0.04
   lineWidth: 0.015
+  jointMaterialTemplate: {fileID: 2100000, guid: fa1e2d3c4b5a697800b9c0d1e2f30001, type: 2}
+  boneMaterialTemplate: {fileID: 2100000, guid: fb1e2d3c4b5a697800b9c0d1e2f30002, type: 2}
 --- !u!114 &544687604
 MonoBehaviour:
   m_ObjectHideFlags: 0

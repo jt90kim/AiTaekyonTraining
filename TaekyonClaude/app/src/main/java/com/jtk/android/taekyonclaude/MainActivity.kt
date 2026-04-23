@@ -1,5 +1,6 @@
 package com.jtk.android.taekyonclaude
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jtk.android.taekyonclaude.ui.theme.TaekyonClaudeTheme
+import com.unity3d.player.UnityPlayer
 import com.unity3d.player.UnityPlayerGameActivity
 import kotlinx.coroutines.delay
 
@@ -35,7 +37,8 @@ class MainActivity : UnityPlayerGameActivity() {
                     TaekyonClaudeTheme {
                         TrainingOverlay(
                             durationSeconds = durationSeconds,
-                            unityReady = _unityReady.value
+                            unityReady = _unityReady.value,
+                            onSendMotion = { clipName -> sendMotion(clipName) }
                         )
                     }
                 }
@@ -49,16 +52,32 @@ class MainActivity : UnityPlayerGameActivity() {
         runOnUiThread { _unityReady.value = true }
     }
 
+    private fun navigateBack() {
+        startActivity(
+            Intent(this, LauncherActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+        )
+        finish()
+    }
+
+    // TEST ONLY — send a named motion clip to Unity
+    private fun sendMotion(clipName: String) {
+        val json = assets.open("motions/$clipName.json")
+            .bufferedReader().use { it.readText() }
+        UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            finish()
+            navigateBack()
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
     @Composable
-    private fun TrainingOverlay(durationSeconds: Int, unityReady: Boolean) {
+    private fun TrainingOverlay(durationSeconds: Int, unityReady: Boolean, onSendMotion: (String) -> Unit = {}) {
         var remainingSeconds by remember { mutableIntStateOf(durationSeconds) }
 
         LaunchedEffect(unityReady) {
@@ -94,7 +113,7 @@ class MainActivity : UnityPlayerGameActivity() {
 
             // Exit button at top-right
             TextButton(
-                onClick = { finish() },
+                onClick = { navigateBack() },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(top = 16.dp, end = 12.dp)
@@ -106,6 +125,14 @@ class MainActivity : UnityPlayerGameActivity() {
                     color = Color.White.copy(alpha = 0.80f)
                 )
             }
+
+            // TEST: blend trigger button — remove before Milestone 4
+            Button(
+                onClick = { onSendMotion("test_motion") },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp)
+            ) { Text("Test Motion") }
 
             // Training-over overlay
             if (done) {
@@ -123,7 +150,7 @@ class MainActivity : UnityPlayerGameActivity() {
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(24.dp))
-                        Button(onClick = { finish() }) {
+                        Button(onClick = { navigateBack() }) {
                             Text("Exit", fontSize = 18.sp)
                         }
                     }
