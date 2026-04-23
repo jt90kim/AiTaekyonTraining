@@ -49,18 +49,19 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 |-----------|-------|--------|
 | 1 — Hello Skeleton | MotionClip, MotionLoader, MotionPlayer, SkeletonMapper, DebugSkeletonRenderer | ✅ Done |
 | 2 — Android in Control | AndroidBridge + Android UI sends JSON to Unity | ✅ Done |
+| 2.5 — Post-M2 Polish | Timer delay, back button, skeleton shader fix, dual-app install fix | ✅ Done |
 | 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ⬜ |
 | 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ⬜ |
 | 5 — Polish | Timing, anticipation, flow refinement | ⬜ |
 
 ## Current Status
 
-**Milestone 2 complete.** Android app (Taekyon Trainer) builds and runs:
-- `LauncherActivity` — splash screen + training setup UI (duration picker + flat move list)
-- `MainActivity` — extends `UnityPlayerGameActivity`; receives selected moves + duration via Intent, overlays Compose controls on Unity
-- Unity as a Library (UaaL) integrated via path reference (`unity-export/unityLibrary`) — no manual copy needed after re-export
-- App theme: `Theme.AppCompat.NoActionBar` with dark/orange Taekyon brand palette
-- Move list populated at runtime from `assets/motions/*.json`
+**Milestone 2.5 complete.** Post-M2 bug fixes shipped:
+- Timer waits for Unity scene-ready signal (`AndroidBridge` → `onUnitySceneReady()` JNI callback)
+- Back button and `✕` overlay button both exit the training activity cleanly
+- Skeleton renders on Android (Inspector-serialized `Material` templates replace `Shader.Find()`)
+- Single app install (Unity launcher activities suppressed via `tools:node="remove"` in manifest)
+- `AndroidBridge` component added to `MotionSystem` scene GameObject
 
 **Next:** Milestone 3 — motion blending (0.2–0.4s LERP between clips) in Unity.
 
