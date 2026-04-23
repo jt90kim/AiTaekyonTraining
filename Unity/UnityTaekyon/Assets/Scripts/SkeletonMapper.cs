@@ -13,6 +13,7 @@ public class SkeletonMapper : MonoBehaviour
             go.transform.SetParent(transform, worldPositionStays: false);
             _joints[name] = go.transform;
         }
+        Debug.Log($"SkeletonMapper.Awake: created {_joints.Count} joints.");
     }
 
     public void ApplyFrame(MotionFrame frame)

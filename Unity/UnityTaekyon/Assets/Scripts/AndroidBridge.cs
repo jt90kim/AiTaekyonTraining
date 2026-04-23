@@ -11,11 +11,26 @@ public class AndroidBridge : MonoBehaviour
         _player = FindFirstObjectByType<MotionPlayer>();
         if (_player == null)
             Debug.LogError("AndroidBridge: no MotionPlayer found in scene.");
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        try
+        {
+            using var jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            using var activity = jc.GetStatic<AndroidJavaObject>("currentActivity");
+            activity.Call("onUnitySceneReady");
+            Debug.Log("AndroidBridge: notified Android that scene is ready.");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("AndroidBridge: could not notify Android ready: " + e.Message);
+        }
+#endif
     }
 
     // Called by Android: UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)
     public void ReceiveMotionMessage(string json)
     {
+        Debug.Log($"AndroidBridge: ReceiveMotionMessage called, JSON length={json?.Length ?? 0}");
         if (_player == null) return;
 
         MotionClip clip = MotionLoader.Load(json);

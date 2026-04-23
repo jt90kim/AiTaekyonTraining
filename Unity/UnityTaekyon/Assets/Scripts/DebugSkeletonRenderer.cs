@@ -7,9 +7,16 @@ public class DebugSkeletonRenderer : MonoBehaviour
     [SerializeField] private float jointRadius = 0.04f;
     [SerializeField] private float lineWidth    = 0.015f;
 
+    // Assign a URP Lit material and a URP Unlit material in the Inspector.
+    // Using serialized material templates guarantees the shaders are included in the Android build.
+    [SerializeField] private Material jointMaterialTemplate;
+    [SerializeField] private Material boneMaterialTemplate;
+
     private readonly Dictionary<string, GameObject> _spheres = new Dictionary<string, GameObject>();
     private readonly List<(LineRenderer lr, string from, string to)> _bones
         = new List<(LineRenderer, string, string)>();
+
+    private int _lateUpdateCount;
 
     private void Awake()
     {
@@ -18,27 +25,31 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void Start()
     {
+        if (jointMaterialTemplate == null || boneMaterialTemplate == null)
+            Debug.LogError("DebugSkeletonRenderer: jointMaterialTemplate or boneMaterialTemplate not assigned in Inspector — skeleton will be invisible on Android.");
+
         CreateJointSpheres();
         CreateBoneLines();
+        Debug.Log($"DebugSkeletonRenderer.Start: created {_spheres.Count} spheres, {_bones.Count} bones. jointMat={jointMaterialTemplate != null}, boneMat={boneMaterialTemplate != null}");
     }
 
     private void LateUpdate()
     {
         UpdateJointSpheres();
         UpdateBoneLines();
+
+        if (_lateUpdateCount < 3)
+        {
+            Transform nose = mapper.GetJoint("nose");
+            Debug.Log($"DebugSkeletonRenderer.LateUpdate[{_lateUpdateCount}]: nose world pos={nose?.position.ToString() ?? "null"}");
+            _lateUpdateCount++;
+        }
     }
 
     // ── Setup ────────────────────────────────────────────────────────────────
 
-    private static Shader SafeShader(string urpName, string builtinFallback)
-    {
-        var s = Shader.Find(urpName);
-        return s != null ? s : Shader.Find(builtinFallback);
-    }
-
     private void CreateJointSpheres()
     {
-        Shader litShader = SafeShader("Universal Render Pipeline/Lit", "Standard");
         foreach (string name in SkeletonDefinition.JointNames)
         {
             Transform joint = mapper.GetJoint(name);
@@ -51,11 +62,13 @@ public class DebugSkeletonRenderer : MonoBehaviour
             Destroy(sphere.GetComponent<Collider>());
 
             var mr = sphere.GetComponent<MeshRenderer>();
-            var mat = new Material(litShader);
-            Color c = SkeletonDefinition.GetJointColor(name);
-            mat.SetColor("_BaseColor", c);
-            mat.color = c;
-            mr.material = mat;
+            if (jointMaterialTemplate != null)
+            {
+                var mat = new Material(jointMaterialTemplate);
+                Color c = SkeletonDefinition.GetJointColor(name);
+                mat.color = c;
+                mr.material = mat;
+            }
 
             _spheres[name] = sphere;
         }
@@ -63,8 +76,6 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void CreateBoneLines()
     {
-        Material lineMat = new Material(SafeShader("Universal Render Pipeline/Unlit", "Unlit/Color"));
-
         foreach (var (from, to) in SkeletonDefinition.Bones)
         {
             if (mapper.GetJoint(from) == null || mapper.GetJoint(to) == null) continue;
@@ -78,10 +89,12 @@ public class DebugSkeletonRenderer : MonoBehaviour
             lr.endWidth   = lineWidth;
             lr.useWorldSpace = true;
 
-            var mat = new Material(lineMat);
-            Color c = SkeletonDefinition.GetBoneColor(from, to);
-            mat.SetColor("_BaseColor", c);
-            lr.material = mat;
+            if (boneMaterialTemplate != null)
+            {
+                var mat = new Material(boneMaterialTemplate);
+                mat.color = SkeletonDefinition.GetBoneColor(from, to);
+                lr.material = mat;
+            }
 
             _bones.Add((lr, from, to));
         }

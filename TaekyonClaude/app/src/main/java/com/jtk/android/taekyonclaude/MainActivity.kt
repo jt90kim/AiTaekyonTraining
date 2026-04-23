@@ -1,6 +1,7 @@
 package com.jtk.android.taekyonclaude
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,6 +20,8 @@ import kotlinx.coroutines.delay
 
 class MainActivity : UnityPlayerGameActivity() {
 
+    private val _unityReady = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -30,7 +33,10 @@ class MainActivity : UnityPlayerGameActivity() {
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 setContent {
                     TaekyonClaudeTheme {
-                        TrainingOverlay(durationSeconds = durationSeconds)
+                        TrainingOverlay(
+                            durationSeconds = durationSeconds,
+                            unityReady = _unityReady.value
+                        )
                     }
                 }
             },
@@ -38,11 +44,25 @@ class MainActivity : UnityPlayerGameActivity() {
         )
     }
 
+    // Called from Unity's AndroidBridge.Start() once the scene is loaded
+    fun onUnitySceneReady() {
+        runOnUiThread { _unityReady.value = true }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     @Composable
-    private fun TrainingOverlay(durationSeconds: Int) {
+    private fun TrainingOverlay(durationSeconds: Int, unityReady: Boolean) {
         var remainingSeconds by remember { mutableIntStateOf(durationSeconds) }
 
-        LaunchedEffect(durationSeconds) {
+        LaunchedEffect(unityReady) {
+            if (!unityReady) return@LaunchedEffect
             while (remainingSeconds > 0) {
                 delay(1000L)
                 remainingSeconds--
@@ -64,11 +84,26 @@ class MainActivity : UnityPlayerGameActivity() {
                 color = Color.Black.copy(alpha = 0.60f)
             ) {
                 Text(
-                    text = timerText,
+                    text = if (unityReady) timerText else "–:––",
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (done) Color(0xFFFF6633) else Color.White
+                )
+            }
+
+            // Exit button at top-right
+            TextButton(
+                onClick = { finish() },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 16.dp, end = 12.dp)
+            ) {
+                Text(
+                    text = "✕",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White.copy(alpha = 0.80f)
                 )
             }
 
@@ -80,12 +115,18 @@ class MainActivity : UnityPlayerGameActivity() {
                         .background(Color.Black.copy(alpha = 0.70f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Training Complete",
-                        fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Training Complete",
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = { finish() }) {
+                            Text("Exit", fontSize = 18.sp)
+                        }
+                    }
                 }
             }
         }
