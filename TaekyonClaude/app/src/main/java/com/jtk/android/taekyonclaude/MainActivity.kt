@@ -59,6 +59,11 @@ class MainActivity : UnityPlayerGameActivity() {
         finish()
     }
 
+    override fun onDestroy() {
+        // UnityPlayerGameActivity.onDestroy() calls System.exit(), which kills the entire process.
+        // Skipping super prevents that so LauncherActivity survives after this activity finishes.
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             navigateBack()

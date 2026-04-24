@@ -6,7 +6,7 @@ object MotionLibrary {
 
     fun listClipNames(context: Context): List<String> =
         context.assets.list("motions")
-            ?.filter { it.endsWith(".json") }
+            ?.filter { it.endsWith(".json") && it.startsWith("kick_") }
             ?.map { it.removeSuffix(".json") }
             ?.sorted()
             ?: emptyList()
