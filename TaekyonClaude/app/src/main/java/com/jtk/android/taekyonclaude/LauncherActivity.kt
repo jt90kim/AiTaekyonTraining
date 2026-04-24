@@ -109,6 +109,7 @@ private fun SetupScreen() {
                         val intent = Intent(context, MainActivity::class.java).apply {
                             putStringArrayListExtra("selectedMoves", ArrayList(selected))
                             putExtra("durationSeconds", minutes * 60 + seconds)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         }
                         context.startActivity(intent)
                     },

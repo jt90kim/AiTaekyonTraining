@@ -22,22 +22,24 @@ import kotlinx.coroutines.delay
 class MainActivity : UnityPlayerGameActivity() {
 
     private val _unityReady = mutableStateOf(false)
+    private val _durationSeconds = mutableIntStateOf(180)
+    private val _sessionKey = mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val selectedMoves = intent.getStringArrayListExtra("selectedMoves") ?: emptyList<String>()
-        val durationSeconds = intent.getIntExtra("durationSeconds", 180)
+        _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
 
         addContentView(
             ComposeView(this).apply {
                 setBackgroundColor(android.graphics.Color.TRANSPARENT)
                 setContent {
                     TaekyonClaudeTheme {
-                        TrainingOverlay(
-                            durationSeconds = durationSeconds,
-                            unityReady = _unityReady.value
-                        )
+                        key(_sessionKey.intValue) {
+                            TrainingOverlay(
+                                durationSeconds = _durationSeconds.intValue,
+                                unityReady = _unityReady.value
+                            )
+                        }
                     }
                 }
             },
@@ -45,23 +47,30 @@ class MainActivity : UnityPlayerGameActivity() {
         )
     }
 
-    // Called from Unity's AndroidBridge.Start() once the scene is loaded
+    // Called when a new "Start Training" intent arrives while activity is already alive
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
+        _sessionKey.intValue++  // Forces TrainingOverlay to recreate with fresh state
+        // Unity scene is still loaded; signal ready so timer starts immediately
+        runOnUiThread { _unityReady.value = true }
+    }
+
+    // Called from Unity's AndroidBridge.Start() once the scene is loaded on first launch
     fun onUnitySceneReady() {
         runOnUiThread { _unityReady.value = true }
     }
 
     private fun navigateBack() {
+        // Bring LauncherActivity's task to the foreground without destroying this activity.
+        // Calling finish() here would trigger UnityPlayerGameActivity.onDestroy() which calls
+        // System.exit() from native code — killing the whole process.
         startActivity(
             Intent(this, LauncherActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         )
-        finish()
-    }
-
-    override fun onDestroy() {
-        // UnityPlayerGameActivity.onDestroy() calls System.exit(), which kills the entire process.
-        // Skipping super prevents that so LauncherActivity survives after this activity finishes.
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -90,7 +99,6 @@ class MainActivity : UnityPlayerGameActivity() {
         val timerText = "%d:%02d".format(minutes, seconds)
 
         Box(modifier = Modifier.fillMaxSize()) {
-            // Timer pill at top-center
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -107,7 +115,6 @@ class MainActivity : UnityPlayerGameActivity() {
                 )
             }
 
-            // Exit button at top-right
             TextButton(
                 onClick = { navigateBack() },
                 modifier = Modifier
@@ -122,7 +129,6 @@ class MainActivity : UnityPlayerGameActivity() {
                 )
             }
 
-            // Training-over overlay
             if (done) {
                 Box(
                     modifier = Modifier
