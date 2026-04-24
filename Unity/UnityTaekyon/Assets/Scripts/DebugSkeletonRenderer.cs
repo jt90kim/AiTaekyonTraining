@@ -12,17 +12,10 @@ public class DebugSkeletonRenderer : MonoBehaviour
     [SerializeField] private Material jointMaterialTemplate;
     [SerializeField] private Material boneMaterialTemplate;
 
-    [SerializeField] private float anticipationPulseSpeed = 6f;
-    [SerializeField] private Color anticipationColor = new Color(1f, 0.6f, 0f); // orange
-
     private readonly Dictionary<string, GameObject> _spheres = new Dictionary<string, GameObject>();
-    private readonly Dictionary<string, (MeshRenderer mr, Color baseColor)> _sphereData
-        = new Dictionary<string, (MeshRenderer, Color)>();
-    private readonly List<(LineRenderer lr, string from, string to, Color baseColor)> _bones
-        = new List<(LineRenderer, string, string, Color)>();
+    private readonly List<(LineRenderer lr, string from, string to)> _bones
+        = new List<(LineRenderer, string, string)>();
 
-    private bool _anticipating;
-    private bool _wasAnticipating;
     private int _lateUpdateCount;
 
     private void Awake()
@@ -40,16 +33,10 @@ public class DebugSkeletonRenderer : MonoBehaviour
         Debug.Log($"DebugSkeletonRenderer.Start: created {_spheres.Count} spheres, {_bones.Count} bones. jointMat={jointMaterialTemplate != null}, boneMat={boneMaterialTemplate != null}");
     }
 
-    public void SetAnticipating(bool on)
-    {
-        _anticipating = on;
-    }
-
     private void LateUpdate()
     {
         UpdateJointSpheres();
         UpdateBoneLines();
-        UpdateAnticipationPulse();
 
         if (_lateUpdateCount < 3)
         {
@@ -75,17 +62,15 @@ public class DebugSkeletonRenderer : MonoBehaviour
             Destroy(sphere.GetComponent<Collider>());
 
             var mr = sphere.GetComponent<MeshRenderer>();
-            Color baseColor = Color.white;
             if (jointMaterialTemplate != null)
             {
                 var mat = new Material(jointMaterialTemplate);
-                baseColor = SkeletonDefinition.GetJointColor(name);
-                mat.color = baseColor;
+                Color c = SkeletonDefinition.GetJointColor(name);
+                mat.color = c;
                 mr.material = mat;
             }
 
             _spheres[name] = sphere;
-            _sphereData[name] = (mr, baseColor);
         }
     }
 
@@ -104,16 +89,14 @@ public class DebugSkeletonRenderer : MonoBehaviour
             lr.endWidth   = lineWidth;
             lr.useWorldSpace = true;
 
-            Color baseColor = Color.white;
             if (boneMaterialTemplate != null)
             {
                 var mat = new Material(boneMaterialTemplate);
-                baseColor = SkeletonDefinition.GetBoneColor(from, to);
-                mat.color = baseColor;
+                mat.color = SkeletonDefinition.GetBoneColor(from, to);
                 lr.material = mat;
             }
 
-            _bones.Add((lr, from, to, baseColor));
+            _bones.Add((lr, from, to));
         }
     }
 
@@ -131,7 +114,7 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void UpdateBoneLines()
     {
-        foreach (var (lr, from, to, _) in _bones)
+        foreach (var (lr, from, to) in _bones)
         {
             Transform a = mapper.GetJoint(from);
             Transform b = mapper.GetJoint(to);
@@ -139,30 +122,5 @@ public class DebugSkeletonRenderer : MonoBehaviour
             lr.SetPosition(0, a.position);
             lr.SetPosition(1, b.position);
         }
-    }
-
-    private void UpdateAnticipationPulse()
-    {
-        if (_anticipating)
-        {
-            float pulse = (Mathf.Sin(Time.time * Mathf.PI * anticipationPulseSpeed) + 1f) * 0.5f;
-            Color tint = Color.Lerp(Color.white, anticipationColor, pulse);
-            ApplyTint(tint);
-            _wasAnticipating = true;
-        }
-        else if (_wasAnticipating)
-        {
-            ApplyTint(Color.white);
-            _wasAnticipating = false;
-        }
-    }
-
-    private void ApplyTint(Color tint)
-    {
-        foreach (var kv in _sphereData)
-            kv.Value.mr.material.color = kv.Value.baseColor * tint;
-
-        foreach (var (lr, _, _, baseColor) in _bones)
-            lr.material.color = baseColor * tint;
     }
 }

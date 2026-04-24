@@ -22,7 +22,6 @@ public class MotionStateMachine : MonoBehaviour
     private enum State { Neutral, Anticipating, SteppingLeft, SteppingRight, KickingLeft, KickingRight }
 
     private MotionPlayer _player;
-    private DebugSkeletonRenderer _renderer;
     private State _state;
     private float _stepTimer;
     private float _anticipateTimer;
@@ -30,8 +29,7 @@ public class MotionStateMachine : MonoBehaviour
 
     private void Start()
     {
-        _player   = GetComponent<MotionPlayer>();
-        _renderer = GetComponent<DebugSkeletonRenderer>();
+        _player = GetComponent<MotionPlayer>();
         if (_player == null)
         {
             Debug.LogError("MotionStateMachine: MotionPlayer not found on this GameObject.");
@@ -66,14 +64,12 @@ public class MotionStateMachine : MonoBehaviour
     {
         _anticipatingLeft  = Random.value < 0.5f;
         _anticipateTimer   = anticipationDuration;
-        _state             = State.Anticipating;
-        _renderer?.SetAnticipating(true);
+        _state = State.Anticipating;
         Debug.Log($"MotionStateMachine: Neutral → Anticipating ({(_anticipatingLeft ? "left" : "right")})");
     }
 
     private void FireStep()
     {
-        _renderer?.SetAnticipating(false);
         TextAsset clip = _anticipatingLeft ? leftStepClip : rightStepClip;
         _state = _anticipatingLeft ? State.SteppingLeft : State.SteppingRight;
         Debug.Log($"MotionStateMachine: Anticipating → {_state}");
@@ -135,7 +131,6 @@ public class MotionStateMachine : MonoBehaviour
 
     private void ReturnToNeutral(float blend = -1f)
     {
-        _renderer?.SetAnticipating(false);
         _state = State.Neutral;
         _stepTimer = Random.Range(minStepInterval, maxStepInterval);
         Debug.Log($"MotionStateMachine: → Neutral (next step in {_stepTimer:F1}s)");
