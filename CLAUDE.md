@@ -68,6 +68,12 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 - Android "Test Motion" button removed; state machine is fully autonomous
 - Scene wired: `MotionStateMachine` component added to `AndroidBridge` GameObject with `neutralClip`, `leftStepClip`, `rightStepClip` assigned
 
+**Post-M4 Android fixes shipped:**
+- Exit/✕/Training Complete no longer kills the app — `MainActivity` lives in its own task (`singleTask` + `taskAffinity=.unity`); `navigateBack()` brings the launcher task forward without ever calling `finish()`, so Unity's native `System.exit()` is never triggered
+- Splash screen no longer replays on exit — `LauncherActivity` is `singleTask` (always reuses the same instance) and uses `rememberSaveable` for the splash-done flag so it survives any system-initiated recreation
+- Move selection list now shows only kick clips (`kick_` prefix filter in `MotionLibrary`); internal step/idle clips are hidden; `kick_1` and `kick_2` placeholder files added
+- Subsequent training sessions handled via `onNewIntent`: timer resets to new duration and starts immediately (Unity already loaded)
+
 **Next:** Milestone 5 — Polish (timing, anticipation, flow refinement).
 
 ## Non-Goals
