@@ -15,10 +15,11 @@ public class MotionPlayer : MonoBehaviour
     private MotionFrame _blendFrom;
     private float _blendTime;
     private bool _isBlending;
+    private float _activeBlendDuration;
 
     public bool IsPlaying => _isPlaying;
 
-    public void Load(MotionClip clip)
+    public void Load(MotionClip clip, float blendOverride = -1f)
     {
         if (_isPlaying && _clip != null && _clip.frames.Length > 0)
         {
@@ -31,6 +32,7 @@ public class MotionPlayer : MonoBehaviour
             _isBlending = false;
         }
 
+        _activeBlendDuration = blendOverride >= 0f ? blendOverride : blendDuration;
         _clip = clip;
         _time = 0f;
         _isPlaying = false;
@@ -75,7 +77,7 @@ public class MotionPlayer : MonoBehaviour
         if (_isBlending)
         {
             _blendTime += deltaTime;
-            float t = Mathf.Clamp01(_blendTime / blendDuration);
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_blendTime / _activeBlendDuration));
             frame = Lerp(_blendFrom, frame, t);
             if (t >= 1f) _isBlending = false;
         }

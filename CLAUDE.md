@@ -52,7 +52,7 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 2.5 — Post-M2 Polish | Timer delay, back button, skeleton shader fix, dual-app install fix | ✅ Done |
 | 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ✅ Done |
 | 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ✅ Done |
-| 5 — Polish | Timing, anticipation, flow refinement | ⬜ |
+| 5 — Polish | Timing, anticipation, flow refinement | ✅ Done |
 
 ## Current Status
 
@@ -74,7 +74,11 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 - Move selection list now shows only kick clips (`kick_` prefix filter in `MotionLibrary`); internal step/idle clips are hidden; `kick_1` and `kick_2` placeholder files added
 - Subsequent training sessions handled via `onNewIntent`: timer resets to new duration and starts immediately (Unity already loaded)
 
-**Next:** Milestone 5 — Polish (timing, anticipation, flow refinement).
+**Milestone 5 complete.** Polish shipped:
+- `MotionPlayer`: blend easing upgraded from linear LERP to `Mathf.SmoothStep`; `Load()` accepts optional `blendOverride` so each transition uses its own duration
+- `MotionStateMachine`: new `Anticipating` state pauses ~0.3s before each step (telegraphs the move); per-transition blend durations wired in — step entry 0.15s (snappy), return-to-neutral 0.30s (settle), kick entry 0.10s (explosive), kick recovery 0.40s (slow); all values tweakable in Inspector
+
+**Next:** Milestone 6 — Real kick clips via MediaPipe capture.
 
 ## Non-Goals
 
