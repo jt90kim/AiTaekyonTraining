@@ -29,18 +29,14 @@ import com.jtk.android.taekyonclaude.ui.theme.TaekyonTextPrimary
 import com.jtk.android.taekyonclaude.ui.theme.TaekyonTextSecondary
 import kotlinx.coroutines.delay
 
-private enum class Screen { SPLASH, SETUP }
-
 class LauncherActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TaekyonClaudeTheme {
-                var screen by remember { mutableStateOf(Screen.SPLASH) }
-                when (screen) {
-                    Screen.SPLASH -> SplashScreen(onFinish = { screen = Screen.SETUP })
-                    Screen.SETUP -> SetupScreen()
-                }
+                var splashDone by rememberSaveable { mutableStateOf(false) }
+                if (!splashDone) SplashScreen(onFinish = { splashDone = true })
+                else SetupScreen()
             }
         }
     }
