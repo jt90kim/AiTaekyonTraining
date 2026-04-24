@@ -53,32 +53,15 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ✅ Done |
 | 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ✅ Done |
 | 5 — Polish | Timing, anticipation, flow refinement | ✅ Done |
+| 6 — Real Kicks | Capture kick clips via MediaPipe; wire into state machine | 🔜 Next |
 
 ## Current Status
-
-**Milestone 4 complete.** Fighter's Rhythm shipped:
-- `MotionStateMachine.cs` — autonomous state machine on the `AndroidBridge` GameObject
-  - States: `Neutral → SteppingLeft/Right → (KickingLeft/Right) → Neutral`
-  - Neutral loops `neutral_idle` and fires a random step after 1.5–3s
-  - Step clips play non-looping; on end, small kick probability check (kick clips null for now → always returns to Neutral)
-  - All transitions logged: `"MotionStateMachine: Neutral → SteppingLeft"` etc.
-- `MotionTimeController.cs` stripped to just `Tick()` + `OnFrameReady` subscription; no sampleClip
-- All three motion clips X-axis fixed (left side = negative X, matching `test_motion.json` convention)
-  - `neutral_idle.json`, `left_step.json`, `right_step.json` updated in both Android assets and Unity SampleMotions
-- Android "Test Motion" button removed; state machine is fully autonomous
-- Scene wired: `MotionStateMachine` component added to `AndroidBridge` GameObject with `neutralClip`, `leftStepClip`, `rightStepClip` assigned
-
-**Post-M4 Android fixes shipped:**
-- Exit/✕/Training Complete no longer kills the app — `MainActivity` lives in its own task (`singleTask` + `taskAffinity=.unity`); `navigateBack()` brings the launcher task forward without ever calling `finish()`, so Unity's native `System.exit()` is never triggered
-- Splash screen no longer replays on exit — `LauncherActivity` is `singleTask` (always reuses the same instance) and uses `rememberSaveable` for the splash-done flag so it survives any system-initiated recreation
-- Move selection list now shows only kick clips (`kick_` prefix filter in `MotionLibrary`); internal step/idle clips are hidden; `kick_1` and `kick_2` placeholder files added
-- Subsequent training sessions handled via `onNewIntent`: timer resets to new duration and starts immediately (Unity already loaded)
 
 **Milestone 5 complete.** Polish shipped:
 - `MotionPlayer`: blend easing upgraded from linear LERP to `Mathf.SmoothStep`; `Load()` accepts optional `blendOverride` so each transition uses its own duration
 - `MotionStateMachine`: new `Anticipating` state pauses ~0.3s before each step (telegraphs the move); per-transition blend durations wired in — step entry 0.15s (snappy), return-to-neutral 0.30s (settle), kick entry 0.10s (explosive), kick recovery 0.40s (slow); all values tweakable in Inspector
 
-**Next:** Milestone 6 — Real kick clips via MediaPipe capture.
+**Next:** Milestone 6 — capture real kick clips via MediaPipe offline, export as JSON, assign to `leftKickClip` / `rightKickClip` in the Inspector.
 
 ## Non-Goals
 
