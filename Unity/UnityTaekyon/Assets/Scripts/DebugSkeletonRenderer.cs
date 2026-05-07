@@ -26,6 +26,7 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
         CreateHeadSphere();
         CreateBoneCapsules();
+        CreateFloorGrid();
     }
 
     private void LateUpdate()
@@ -77,6 +78,37 @@ public class DebugSkeletonRenderer : MonoBehaviour
         Transform nose = mapper.GetJoint("nose");
         if (nose != null)
             _headSphere.transform.position = nose.position;
+    }
+
+    private void CreateFloorGrid()
+    {
+        const int   tiles    = 20;
+        const float tileSize = 0.2f;
+
+        var tex = new Texture2D(tiles, tiles, TextureFormat.RGB24, false);
+        tex.filterMode = FilterMode.Point;
+        var light = new Color(0.55f, 0.55f, 0.55f);
+        var dark  = new Color(0.28f, 0.28f, 0.28f);
+        for (int x = 0; x < tiles; x++)
+            for (int z = 0; z < tiles; z++)
+                tex.SetPixel(x, z, (x + z) % 2 == 0 ? light : dark);
+        tex.Apply();
+
+        var go  = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        go.name = "FloorGrid";
+        Destroy(go.GetComponent<Collider>());
+
+        // Unity Plane is 10×10 at localScale (1,1,1)
+        float scale = tiles * tileSize / 10f;
+        go.transform.localScale = new Vector3(scale, 1f, scale);
+
+        if (boneMaterialTemplate != null)
+        {
+            var mat = new Material(boneMaterialTemplate);
+            mat.color = Color.white;
+            mat.SetTexture("_BaseMap", tex);
+            go.GetComponent<MeshRenderer>().material = mat;
+        }
     }
 
     private void UpdateBoneCapsules()
