@@ -16,10 +16,29 @@ public class MotionPlayer : MonoBehaviour
     private float _blendTime;
     private bool _isBlending;
     private float _activeBlendDuration;
+    private float _playbackSpeed = 1f;
 
     public bool IsPlaying => _isPlaying;
 
-    public void Load(MotionClip clip, float blendOverride = -1f)
+    private void Start()
+    {
+        var mapper = GetComponent<SkeletonMapper>();
+        if (mapper == null) mapper = FindFirstObjectByType<SkeletonMapper>();
+        if (mapper != null)
+        {
+            OnFrameReady += mapper.ApplyFrame;
+            Debug.Log($"MotionPlayer.Start: subscribed to mapper on '{mapper.gameObject.name}'");
+        }
+        else
+            Debug.LogError("MotionPlayer.Start: no SkeletonMapper found — skeleton will not move.");
+    }
+
+    private void Update()
+    {
+        Tick(Time.deltaTime);
+    }
+
+    public void Load(MotionClip clip, float blendOverride = -1f, float speed = 1f)
     {
         if (_isPlaying && _clip != null && _clip.frames.Length > 0)
         {
@@ -33,6 +52,7 @@ public class MotionPlayer : MonoBehaviour
         }
 
         _activeBlendDuration = blendOverride >= 0f ? blendOverride : blendDuration;
+        _playbackSpeed = speed;
         _clip = clip;
         _time = 0f;
         _isPlaying = false;
@@ -58,7 +78,17 @@ public class MotionPlayer : MonoBehaviour
     {
         if (!_isPlaying || _clip == null || _clip.frames.Length == 0) return;
 
-        _time += deltaTime;
+        if (_isBlending)
+        {
+            _blendTime += deltaTime;
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_blendTime / _activeBlendDuration));
+            MotionFrame frame = Lerp(_blendFrom, GetInterpolatedFrame(0f), t);
+            if (t >= 1f) _isBlending = false;
+            OnFrameReady?.Invoke(frame);
+            return;
+        }
+
+        _time += deltaTime * _playbackSpeed;
         float duration = _clip.Duration;
 
         if (duration > 0f && _time >= duration)
@@ -72,17 +102,7 @@ public class MotionPlayer : MonoBehaviour
             }
         }
 
-        MotionFrame frame = GetInterpolatedFrame(_time);
-
-        if (_isBlending)
-        {
-            _blendTime += deltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(_blendTime / _activeBlendDuration));
-            frame = Lerp(_blendFrom, frame, t);
-            if (t >= 1f) _isBlending = false;
-        }
-
-        OnFrameReady?.Invoke(frame);
+        OnFrameReady?.Invoke(GetInterpolatedFrame(_time));
     }
 
     private MotionFrame GetInterpolatedFrame(float time)

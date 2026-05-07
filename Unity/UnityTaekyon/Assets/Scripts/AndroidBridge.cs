@@ -4,11 +4,13 @@ using UnityEngine;
 // The GameObject holding this component must be named "AndroidBridge" in the scene.
 public class AndroidBridge : MonoBehaviour
 {
-    private MotionPlayer _player;
+    private MotionPlayer       _player;
+    private MotionStateMachine _stateMachine;
 
     private void Start()
     {
-        _player = FindFirstObjectByType<MotionPlayer>();
+        _player       = FindFirstObjectByType<MotionPlayer>();
+        _stateMachine = FindFirstObjectByType<MotionStateMachine>();
         if (_player == null)
             Debug.LogError("AndroidBridge: no MotionPlayer found in scene.");
 
@@ -25,6 +27,13 @@ public class AndroidBridge : MonoBehaviour
             Debug.LogWarning("AndroidBridge: could not notify Android ready: " + e.Message);
         }
 #endif
+    }
+
+    // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_kick,split_kick")
+    public void SetEnabledMoves(string csv)
+    {
+        Debug.Log($"AndroidBridge: SetEnabledMoves '{csv}'");
+        _stateMachine?.SetEnabledMoves(csv);
     }
 
     // Called by Android: UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)

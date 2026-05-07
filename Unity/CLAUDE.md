@@ -27,11 +27,11 @@ Do not read or modify anything under `../../unity-export/` — it is auto-genera
 | `AndroidBridge.cs` | Entry point; receives JSON from Android, triggers playback |
 | `MotionLoader.cs` | Parses JSON → MotionClip (custom parser, not JsonUtility) |
 | `MotionPlayer.cs` | Core engine: frame stepping, interpolation, playback control |
-| `MotionTimeController.cs` | Drives per-frame time, feeds MotionPlayer |
+| `MotionTimeController.cs` | Deprecated — empty shell, no longer in playback path |
 | `SkeletonMapper.cs` | Maps joint name strings → Unity Transforms, applies positions |
 | `SkeletonDefinition.cs` | Defines bone hierarchy for rendering |
 | `DebugSkeletonRenderer.cs` | Renders skeleton (spheres + LineRenderer, color-coded by limb) |
-| `MotionStateMachine.cs` | Manages Neutral / LeftForward / RightForward / Transition states |
+| `MotionStateMachine.cs` | Data-driven state machine: stances, transitions, move variants (see below) |
 
 ## Data Structures
 
@@ -51,24 +51,38 @@ class MotionFrame {
 ```
 AndroidBridge.ReceiveMotionMessage(json)
     → MotionLoader.Parse(json) → MotionClip
-    → MotionPlayer.Play(clip)
-        → MotionTimeController (drives frame index)
-        → SkeletonMapper.Apply(frame)
+    → MotionPlayer.Load(clip) + MotionPlayer.Play()
+        MotionPlayer.Update() self-ticks each frame
+        MotionPlayer.Start() subscribes to SkeletonMapper.ApplyFrame
+        → SkeletonMapper.ApplyFrame(frame)
             → DebugSkeletonRenderer (renders)
 ```
 
 ## State Machine
 
-```
-Neutral
-  → LeftForward  (via left-step clip)
-  → Neutral      (via return clip)
-  → RightForward (via right-step clip)
-  → Neutral      (via return clip)
-  → repeat
+Data-driven. All configuration is in the Inspector — no hardcoded clip names.
 
-LeftForward  → may inject LeftKick  → return to LeftForward
-RightForward → may inject RightKick → return to RightForward
+**States:** `Idling → Anticipating → Transitioning | PerformingMove → Idling`
+
+**Stance cycle (fixed alternation):**
+```
+neutral → left_forward → neutral → right_forward → neutral → …
+```
+
+**Move injection:** only fires from `left_forward` or `right_forward`, never from neutral.
+Filters `MoveVariant[]` by `fromStance == _currentStance` and `moveType in _enabledMoveTypes`,
+then rolls `moveProbability`. On clip end, returns to the same stance idle.
+
+**Inspector arrays:**
+```csharp
+StanceDefinition[]     stances;      // name + idleClip
+TransitionDefinition[] transitions;  // fromStance, toStance, clip, blendIn
+MoveVariant[]          moveVariants; // moveType, fromStance, clip, blendIn, blendOut
+```
+
+**Android API:**
+```
+UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_kick,split_kick")
 ```
 
 ## Motion Blending
@@ -89,15 +103,6 @@ Between any two clips, blend from current pose → first frame of next clip:
 
 ## Current Status
 
-Empty Unity 6 project — no scripts yet. Starting at Phase 1.
-
-## Implementation Order
-
-1. MotionClip + MotionFrame structs
-2. MotionLoader (JSON parser)
-3. MotionPlayer (frame playback + interpolation)
-4. SkeletonMapper + default pose
-5. DebugSkeletonRenderer
-6. AndroidBridge
-7. Motion blending
-8. MotionStateMachine + kick injection
+All scripts implemented. All 11 motion clips extracted and assigned in Inspector.
+Idle and transition clips are good. Kick variants are marked for recapture (sloppy initial takes).
+See root `CLAUDE.md` for full clip status and naming convention.

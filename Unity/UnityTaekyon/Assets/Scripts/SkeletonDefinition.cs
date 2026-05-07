@@ -59,13 +59,24 @@ public static class SkeletonDefinition
 
     public static Color GetBoneColor(string from, string to)
     {
-        bool leftFrom  = from.StartsWith("left_");
-        bool rightFrom = from.StartsWith("right_");
-        bool leftTo    = to.StartsWith("left_");
-        bool rightTo   = to.StartsWith("right_");
+        if (IsArmJoint(from) && IsArmJoint(to))
+            return new Color(1f, 0.55f, 0.1f);   // orange — arms
 
-        if (leftFrom  && leftTo)  return new Color(0.2f, 0.6f, 1f);
-        if (rightFrom && rightTo) return new Color(1f,   0.4f, 0.3f);
-        return Color.white; // cross-body / torso
+        if (IsLegJoint(from) && IsLegJoint(to))
+        {
+            bool left = from.StartsWith("left_") || to.StartsWith("left_");
+            return left
+                ? new Color(0.2f,  0.6f,  1f)    // blue  — left leg
+                : new Color(1f,    0.35f, 0.25f); // red   — right leg
+        }
+
+        return new Color(0.75f, 0.75f, 0.75f);   // gray  — torso
     }
+
+    private static bool IsArmJoint(string n) =>
+        n.Contains("shoulder") || n.Contains("elbow") || n.Contains("wrist");
+
+    private static bool IsLegJoint(string n) =>
+        n.Contains("hip") || n.Contains("knee") || n.Contains("ankle")
+        || n.Contains("heel") || n.Contains("foot");
 }

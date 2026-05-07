@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class SkeletonMapper : MonoBehaviour
 {
+    [SerializeField] private float yRotationOffset = 0f;
+
     private readonly Dictionary<string, Transform> _joints = new Dictionary<string, Transform>();
 
     private void Awake()
@@ -13,15 +15,15 @@ public class SkeletonMapper : MonoBehaviour
             go.transform.SetParent(transform, worldPositionStays: false);
             _joints[name] = go.transform;
         }
-        Debug.Log($"SkeletonMapper.Awake: created {_joints.Count} joints.");
     }
 
     public void ApplyFrame(MotionFrame frame)
     {
+        Quaternion rot = Quaternion.Euler(0f, yRotationOffset, 0f);
         foreach (var kv in frame.joints)
         {
             if (_joints.TryGetValue(kv.Key, out Transform t))
-                t.localPosition = kv.Value;
+                t.localPosition = rot * kv.Value;
         }
     }
 

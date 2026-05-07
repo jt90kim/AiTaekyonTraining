@@ -4,19 +4,15 @@ using UnityEngine;
 public class DebugSkeletonRenderer : MonoBehaviour
 {
     [SerializeField] private SkeletonMapper mapper;
-    [SerializeField] private float jointRadius = 0.04f;
-    [SerializeField] private float lineWidth    = 0.015f;
+    [SerializeField] private float boneRadius = 0.04f;
+    [SerializeField] private float headRadius = 0.08f;
 
-    // Assign a URP Lit material and a URP Unlit material in the Inspector.
-    // Using serialized material templates guarantees the shaders are included in the Android build.
     [SerializeField] private Material jointMaterialTemplate;
     [SerializeField] private Material boneMaterialTemplate;
 
-    private readonly Dictionary<string, GameObject> _spheres = new Dictionary<string, GameObject>();
-    private readonly List<(LineRenderer lr, string from, string to)> _bones
-        = new List<(LineRenderer, string, string)>();
-
-    private int _lateUpdateCount;
+    private GameObject _headSphere;
+    private readonly List<(Transform bone, string from, string to)> _bones
+        = new List<(Transform, string, string)>();
 
     private void Awake()
     {
@@ -26,101 +22,79 @@ public class DebugSkeletonRenderer : MonoBehaviour
     private void Start()
     {
         if (jointMaterialTemplate == null || boneMaterialTemplate == null)
-            Debug.LogError("DebugSkeletonRenderer: jointMaterialTemplate or boneMaterialTemplate not assigned in Inspector — skeleton will be invisible on Android.");
+            Debug.LogError("DebugSkeletonRenderer: material templates not assigned — skeleton will be invisible on Android.");
 
-        CreateJointSpheres();
-        CreateBoneLines();
-        Debug.Log($"DebugSkeletonRenderer.Start: created {_spheres.Count} spheres, {_bones.Count} bones. jointMat={jointMaterialTemplate != null}, boneMat={boneMaterialTemplate != null}");
+        CreateHeadSphere();
+        CreateBoneCapsules();
     }
 
     private void LateUpdate()
     {
-        UpdateJointSpheres();
-        UpdateBoneLines();
-
-        if (_lateUpdateCount < 3)
-        {
-            Transform nose = mapper.GetJoint("nose");
-            Debug.Log($"DebugSkeletonRenderer.LateUpdate[{_lateUpdateCount}]: nose world pos={nose?.position.ToString() ?? "null"}");
-            _lateUpdateCount++;
-        }
+        UpdateHeadSphere();
+        UpdateBoneCapsules();
     }
 
-    // ── Setup ────────────────────────────────────────────────────────────────
-
-    private void CreateJointSpheres()
+    private void CreateHeadSphere()
     {
-        foreach (string name in SkeletonDefinition.JointNames)
+        _headSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        _headSphere.name = "head";
+        _headSphere.transform.SetParent(transform);
+        _headSphere.transform.localScale = Vector3.one * (headRadius * 2f);
+        Destroy(_headSphere.GetComponent<Collider>());
+
+        if (jointMaterialTemplate != null)
         {
-            Transform joint = mapper.GetJoint(name);
-            if (joint == null) continue;
-
-            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.name = "sphere_" + name;
-            sphere.transform.SetParent(transform);
-            sphere.transform.localScale = Vector3.one * (jointRadius * 2f);
-            Destroy(sphere.GetComponent<Collider>());
-
-            var mr = sphere.GetComponent<MeshRenderer>();
-            if (jointMaterialTemplate != null)
-            {
-                var mat = new Material(jointMaterialTemplate);
-                Color c = SkeletonDefinition.GetJointColor(name);
-                mat.color = c;
-                mr.material = mat;
-            }
-
-            _spheres[name] = sphere;
+            var mat = new Material(jointMaterialTemplate);
+            mat.color = Color.yellow;
+            _headSphere.GetComponent<MeshRenderer>().material = mat;
         }
     }
 
-    private void CreateBoneLines()
+    private void CreateBoneCapsules()
     {
         foreach (var (from, to) in SkeletonDefinition.Bones)
         {
             if (mapper.GetJoint(from) == null || mapper.GetJoint(to) == null) continue;
 
-            var go = new GameObject($"bone_{from}_{to}");
+            var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            go.name = $"bone_{from}_{to}";
             go.transform.SetParent(transform);
-
-            var lr = go.AddComponent<LineRenderer>();
-            lr.positionCount = 2;
-            lr.startWidth = lineWidth;
-            lr.endWidth   = lineWidth;
-            lr.useWorldSpace = true;
+            Destroy(go.GetComponent<Collider>());
 
             if (boneMaterialTemplate != null)
             {
                 var mat = new Material(boneMaterialTemplate);
                 mat.color = SkeletonDefinition.GetBoneColor(from, to);
-                lr.material = mat;
+                go.GetComponent<MeshRenderer>().material = mat;
             }
 
-            _bones.Add((lr, from, to));
+            _bones.Add((go.transform, from, to));
         }
     }
 
-    // ── Per-frame update ─────────────────────────────────────────────────────
-
-    private void UpdateJointSpheres()
+    private void UpdateHeadSphere()
     {
-        foreach (var kv in _spheres)
-        {
-            Transform joint = mapper.GetJoint(kv.Key);
-            if (joint != null)
-                kv.Value.transform.position = joint.position;
-        }
+        Transform nose = mapper.GetJoint("nose");
+        if (nose != null)
+            _headSphere.transform.position = nose.position;
     }
 
-    private void UpdateBoneLines()
+    private void UpdateBoneCapsules()
     {
-        foreach (var (lr, from, to) in _bones)
+        foreach (var (bone, from, to) in _bones)
         {
             Transform a = mapper.GetJoint(from);
             Transform b = mapper.GetJoint(to);
             if (a == null || b == null) continue;
-            lr.SetPosition(0, a.position);
-            lr.SetPosition(1, b.position);
+
+            Vector3 dir = b.position - a.position;
+            float length = dir.magnitude;
+            if (length < 0.001f) continue;
+
+            bone.position = (a.position + b.position) * 0.5f;
+            bone.rotation = Quaternion.FromToRotation(Vector3.up, dir.normalized);
+            // Unity cylinder height = 2 at localScale.y = 1, so use length * 0.5
+            bone.localScale = new Vector3(boneRadius * 2f, length * 0.5f, boneRadius * 2f);
         }
     }
 }
