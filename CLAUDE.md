@@ -58,56 +58,34 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 3 — Smooth Moves | Motion blending (0.2–0.4s LERP between clips) | ✅ Done |
 | 4 — Fighter's Rhythm | State machine + autonomous step loop + kicks | ✅ Done |
 | 5 — Polish | Timing, anticipation, flow refinement | ✅ Done |
-| 6 — Real Kicks | Capture kick clips via MediaPipe; wire into data-driven state machine | 🔄 Recapturing |
+| 6 — Real Kicks | Capture kick clips via MediaPipe; wire into data-driven state machine | ✅ Done |
+| 7 — Visual Polish | Capsule renderer, color coding, floor grid, perspective camera | ✅ Done |
 
 ## Current Status
 
-**Milestone 6 clips captured and wired.** All 11 clips have been extracted and assigned in the Unity Inspector. Motion quality is acceptable but the kick clips need recapture — the initial takes were sloppy and the kick motion is hard to read on screen. Recapture planned.
+**All milestones complete.** The opponent runs autonomously, performs kicks continuously, and the scene renders cleanly with color-coded limbs and a perspective floor grid for depth reference.
 
-### What shipped (M6)
+### Scene configuration (SampleScene.unity)
 
-**`MotionStateMachine.cs` — full rewrite (data-driven):**
-- Replaced hardcoded 5-state machine with configurable arrays: `StanceDefinition[]`, `TransitionDefinition[]`, `MoveVariant[]`
-- Fixed alternating stance cycle: neutral → left_forward → neutral → right_forward → neutral → …
-- Moves only fire from a forward stance (never from neutral)
-- Move selection: filters `MoveVariant[]` by current stance + enabled move types, then rolls probability
-- After a move, fighter returns to the same stance idle (not neutral)
-- `SetEnabledMoves(string csv)` public method — called by AndroidBridge when Android sends selection
-- In `Start()`, seeds `_enabledMoveTypes` from all configured `moveVariants` — ensures kicks fire in the Unity Editor without Android calling `SetEnabledMoves`
+| Setting | Value |
+|---|---|
+| Camera | Perspective, FOV 50, position (0, 1.5, -3), 5° downward tilt |
+| Skeleton root Y rotation | ~190° (faces camera) |
+| Move probability | 95% |
+| Idle duration | 0 (no pause between actions) |
+| Transition speed | 3× |
+| Move (kick) speed | 2.5× |
 
-**`AndroidBridge.cs` — added `SetEnabledMoves` handler:**
-- Android calls `UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_low,split_kick_low")`
-- Forwards to `MotionStateMachine.SetEnabledMoves()`
+### Visual system (DebugSkeletonRenderer.cs)
 
-**`MotionLibrary.kt` — rewritten with typed move catalog:**
-- `data class MoveType(val id: String, val displayName: String)`
-- Explicit catalog replaces filename glob filter; IDs match `moveType` field in Unity Inspector
-- `LauncherActivity` reads this to populate selection UI; selected IDs sent to Unity as CSV
+- **Arms:** orange cylinders
+- **Left leg:** blue cylinders
+- **Right leg:** red cylinders
+- **Torso:** gray cylinders
+- **Head:** yellow sphere
+- **Floor:** 8×8 black/white checkerboard plane (4m×4m) at y=0, visible in perspective
 
-**`tools/extract_motion.py` — MediaPipe capture script (upgraded):**
-- Input: video file. Output: `{ fps, frames[] }` JSON in project format
-- Outputs at **15 fps** (was 8 fps); extracts 19 joints; converts axes to Unity space
-- **Auto facing correction:** detects filming angle from average shoulder vector, rotates all frames so skeleton faces +X. No manual angle input needed. Prints correction angle in the sanity output.
-- Sanity printout: nose y range, ankle y range, y offset applied, facing correction degrees
-
-**`MotionPlayer.cs` — now self-contained:**
-- Moved frame ticking into its own `Update()` — no longer depends on `MotionTimeController`
-- Moved `SkeletonMapper` subscription into its own `Start()` — no longer requires external wiring
-
-**`MotionTimeController.cs` — deprecated:**
-- Replaced by `MotionPlayer`'s own `Update()`. Kept as empty shell so the scene component slot isn't lost.
-
-**`SampleScene.unity` — Inspector wired via direct YAML edit:**
-- Stances (3), Transitions (4), MoveVariants (4) arrays populated with all clip GUIDs
-- The YAML still had old field names (`neutralClip`, `leftStepClip`, etc.) from the previous MotionStateMachine version; these were replaced with the new array structure
-
-**`tools/extract_motion.py` + all 11 clips:**
-- All clips extracted, grounded, and facing-corrected
-- Placed in `Unity/UnityTaekyon/Assets/SampleMotions/` and `TaekyonClaude/app/src/main/assets/motions/`
-
-### Clips present but marked for recapture
-
-All 11 clips exist and are wired. Idle and transition clips look good. The 4 kick variants need better takes.
+### All 11 motion clips
 
 | Filename | Type | State |
 |---|---|---|
@@ -118,16 +96,19 @@ All 11 clips exist and are wired. Idle and transition clips look good. The 4 kic
 | `left_to_neutral.json` | transition | ✅ Good |
 | `neutral_to_right.json` | transition | ✅ Good |
 | `right_to_neutral.json` | transition | ✅ Good |
-| `roundhouse_left_front_low.json` | move variant | 🔄 Recapture |
-| `roundhouse_left_rear_low.json` | move variant | 🔄 Recapture |
-| `roundhouse_right_front_low.json` | move variant | 🔄 Recapture |
-| `roundhouse_right_rear_low.json` | move variant | 🔄 Recapture |
+| `roundhouse_left_front_low.json` | move variant | ✅ Captured |
+| `roundhouse_left_rear_low.json` | move variant | ✅ Captured |
+| `roundhouse_right_front_low.json` | move variant | ✅ Captured |
+| `roundhouse_right_rear_low.json` | move variant | ✅ Captured |
 
-Place new captures in **both**:
-- `Unity/UnityTaekyon/Assets/SampleMotions/`
-- `TaekyonClaude/app/src/main/assets/motions/`
+### Key implementation notes
 
-The Inspector wiring (GUIDs) stays the same as long as filenames don't change — Unity tracks by GUID, not content.
+- `extract_motion.py` facing correction is clamped to ±90° — prevents ~180° body flip from filming angle
+- `SkeletonMapper.yRotationOffset` + root Transform rotation used to orient skeleton toward camera
+- `MotionPlayer.Tick()` holds clip at frame 0 during blend (avoids mid-clip snap on transition)
+- Anticipating state removed — Idling fires directly into `Fire()` when timer expires
+- After a kick, fighter transitions immediately to neutral (no idle pause)
+- Neutral stance passes through with timer=0 (fires instantly)
 
 ### Move type naming convention
 ```
@@ -136,9 +117,8 @@ The Inspector wiring (GUIDs) stays the same as long as filenames don't change �
   leg_role = front | rear   (which leg executes, relative to stance)
   height   = low | high     (target height of the kick)
 ```
-`left`/`right` always describes the stance, never the kicking leg.
 
-**Next:** Recapture the 4 kick variants per `tools/capture_guide.md`. Run `extract_motion.py`, overwrite the existing files. The Inspector wiring will pick up the new content automatically.
+**Next:** Android integration testing — verify `SetEnabledMoves` bridge from Android UI correctly filters move variants in Unity.
 
 ## Non-Goals
 
