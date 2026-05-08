@@ -101,9 +101,6 @@ public class DebugSkeletonRenderer : MonoBehaviour
         // Unity Plane is 10×10 at localScale (1,1,1)
         float scale = tiles * tileSize / 10f;
         go.transform.localScale = new Vector3(scale, 1f, scale);
-        // Tilt toward the camera so the checkerboard is visible from a front-facing camera
-        go.transform.position = new Vector3(0f, 0f, 1f);
-        go.transform.rotation = Quaternion.Euler(-70f, 0f, 0f);
 
         if (boneMaterialTemplate != null)
         {
