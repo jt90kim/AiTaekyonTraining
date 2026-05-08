@@ -82,13 +82,13 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void CreateFloorGrid()
     {
-        const int   tiles    = 20;
-        const float tileSize = 0.2f;
+        const int   tiles    = 8;
+        const float tileSize = 0.5f;
 
         var tex = new Texture2D(tiles, tiles, TextureFormat.RGB24, false);
         tex.filterMode = FilterMode.Point;
-        var light = new Color(0.55f, 0.55f, 0.55f);
-        var dark  = new Color(0.28f, 0.28f, 0.28f);
+        var light = Color.white;
+        var dark  = Color.black;
         for (int x = 0; x < tiles; x++)
             for (int z = 0; z < tiles; z++)
                 tex.SetPixel(x, z, (x + z) % 2 == 0 ? light : dark);
@@ -101,6 +101,9 @@ public class DebugSkeletonRenderer : MonoBehaviour
         // Unity Plane is 10×10 at localScale (1,1,1)
         float scale = tiles * tileSize / 10f;
         go.transform.localScale = new Vector3(scale, 1f, scale);
+        // Tilt toward the camera so the checkerboard is visible from a front-facing camera
+        go.transform.position = new Vector3(0f, 0f, 1f);
+        go.transform.rotation = Quaternion.Euler(-70f, 0f, 0f);
 
         if (boneMaterialTemplate != null)
         {
