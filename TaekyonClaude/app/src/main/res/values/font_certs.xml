@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Google Mobile Services font provider certificates.
+  Copy the real content from any Compose sample, e.g.:
+  https://github.com/android/compose-samples/blob/main/JetNews/app/src/main/res/values/font_certs.xml
+  Without valid certs the provider falls back to system fonts gracefully.
+-->
+<resources>
+    <array name="com_google_android_gms_fonts_certs">
+        <item>@array/com_google_android_gms_fonts_certs_dev</item>
+        <item>@array/com_google_android_gms_fonts_certs_prod</item>
+    </array>
+    <string-array name="com_google_android_gms_fonts_certs_dev">
+        <item>
+            MIIEqDCCA5CgAwIBAgIJANWFuGx90071MA0GCSqGSIb3DQEBBAUAMIGUMQswCQYD
+            VQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZyYW5j
+            aXNjbzETMBEGA1UEChMKR29vZ2xlIEluYzEUMBIGA1UECxMLRW5naW5lZXJpbmcx
+            FDASBGNVBAMTC0dvb2dsZSBBdXRoMB4XDTE0MDEyOTIyMDMwNVoXDTM0MDEyNDIy
+            MDMwNVowgZQxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFBYD
+            VQQHEw1TYW4gRnJhbmNpc2NvMRMwEQYDVQQKEwpHb29nbGUgSW5jMRQwEgYDVQQL
+            EwtFbmdpbmVlcmluZzEUMBIGA1UEAxMLR29vZ2xlIEF1dGgwggEiMA0GCSqGSIb3
+            DQEBAQUAA4IBDwAwggEKAoIBAQC29YHEP7tCLOiGBckfCZVm+oFzIbBv6g8XGbX9
+            kM5EBoAHHMN7RoKPlyS6J+YXZ9JzXMvF8W5X+nxH6+XAJH5LGdp0B7uMT5LNKJH
+            VRH1MHAuFkXqNPfymvwQwzJG8JuEJQaBlH0bGh4PLACEHOLDER_REPLACE_ME
+        </item>
+    </string-array>
+    <string-array name="com_google_android_gms_fonts_certs_prod">
+        <item>
+            MIIEQzCCAyugAwIBAgIJAMLgh0ZkSjCNMA0GCSqGSIb3DQEBBAUAMHMxCzAJBgNV
+            BAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFBYDVQQHEw1Nb3VudGFpbiBW
+            aWV3MRQwEgYDVQQKEwtHb29nbGUgSW5jMREwDwYDVQQLEwhBbmRyb2lkMQ4wDAYD
+            VQQDEwVHbG9iYWwwHhcNMTYwMTI1MDA1MDMzWhcNMjYwMTIyMDA1MDMzWjBzMQsw
+            PLACEHOLDER_REPLACE_ME
+        </item>
+    </string-array>
+</resources>

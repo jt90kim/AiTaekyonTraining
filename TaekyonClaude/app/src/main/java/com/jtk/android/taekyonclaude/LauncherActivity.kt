@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -16,319 +19,613 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonBackground
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonClaudeTheme
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonOrange
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonSurface
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonTextPrimary
-import com.jtk.android.taekyonclaude.ui.theme.TaekyonTextSecondary
-import kotlinx.coroutines.delay
+import androidx.core.view.WindowCompat
+import com.jtk.android.taekyonclaude.ui.theme.*
 
 class LauncherActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             TaekyonClaudeTheme {
-                var splashDone by rememberSaveable { mutableStateOf(false) }
-                if (!splashDone) SplashScreen(onFinish = { splashDone = true })
-                else SetupScreen()
+                var showSetup by rememberSaveable { mutableStateOf(false) }
+                var seconds by rememberSaveable { mutableIntStateOf(60) }
+                // Store as List<String> so rememberSaveable can serialize it via Bundle
+                var enabledMovesList by rememberSaveable { mutableStateOf(listOf("roundhouse_low")) }
+                val enabledMoves = enabledMovesList.toSet()
+
+                if (showSetup) {
+                    SetupScreen(
+                        seconds = seconds,
+                        enabledMoves = enabledMoves,
+                        onSecondsChange = { seconds = it },
+                        onMovesChange = { enabledMovesList = it.toList() },
+                        onBack = { showSetup = false },
+                        onStart = {
+                            startActivity(
+                                Intent(this, MainActivity::class.java).apply {
+                                    putExtra("durationSeconds", seconds)
+                                    putExtra("enabledMoves", enabledMoves.joinToString(","))
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                            )
+                        },
+                    )
+                } else {
+                    SplashScreen(onContinue = { showSetup = true })
+                }
             }
         }
     }
 }
 
-@Composable
-private fun SplashScreen(onFinish: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2000)
-        onFinish()
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+private fun Modifier.dashedBorder(color: androidx.compose.ui.graphics.Color, width: Dp = 1.dp, radius: Dp = 12.dp): Modifier =
+    drawBehind {
+        drawRoundRect(
+            color = color,
+            style = Stroke(
+                width = width.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 5.dp.toPx())),
+            ),
+            cornerRadius = CornerRadius(radius.toPx()),
+        )
     }
+
+@Composable
+private fun MonoLabel(text: String, color: androidx.compose.ui.graphics.Color = Mute, size: Int = 10) {
+    Text(
+        text = text,
+        fontFamily = GeistMonoFamily,
+        fontSize = size.sp,
+        fontWeight = FontWeight.Medium,
+        color = color,
+        letterSpacing = 0.06.em,
+    )
+}
+
+// ─── Splash ─────────────────────────────────────────────────────────────────
+
+@Composable
+private fun SplashScreen(onContinue: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(TaekyonBackground),
-        contentAlignment = Alignment.Center
+            .background(Bg)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(TaekyonOrange),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("T", color = TaekyonTextPrimary, fontSize = 42.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.height(28.dp))
-            Text(
-                "TAEKYON TRAINER",
-                color = TaekyonTextPrimary,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 4.sp
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "AI TRAINING PARTNER",
-                color = TaekyonTextSecondary,
-                fontSize = 11.sp,
-                letterSpacing = 3.sp
-            )
+        // Top meta strip
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(horizontal = 22.dp, vertical = 18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            MonoLabel("B · EMBERS")
+            MonoLabel("v0.4.1")
         }
-    }
-}
 
-@Composable
-private fun SetupScreen() {
-    val context = LocalContext.current
-    var minutes by remember { mutableIntStateOf(3) }
-    var seconds by remember { mutableIntStateOf(0) }
-    val moves = remember { MotionLibrary.listClipNames(context) }
-    val selected = remember { mutableStateListOf<String>() }
-
-    Scaffold(
-        containerColor = TaekyonBackground,
-        bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(TaekyonBackground)
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Button(
-                    onClick = {
-                        val intent = Intent(context, MainActivity::class.java).apply {
-                            putStringArrayListExtra("selectedMoves", ArrayList(selected))
-                            putExtra("durationSeconds", minutes * 60 + seconds)
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                        context.startActivity(intent)
-                    },
-                    enabled = selected.isNotEmpty(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = TaekyonOrange,
-                        disabledContainerColor = Color(0xFF4A2010)
-                    )
-                ) {
-                    Text(
-                        "▶  START TRAINING  ⚡",
-                        color = TaekyonTextPrimary,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    )
-                }
-            }
-        }
-    ) { padding ->
+        // Center brand block
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(horizontal = 28.dp),
         ) {
-            Spacer(Modifier.height(20.dp))
+            // Hangul accent
+            Text(
+                "결련택견",
+                fontFamily = NotoSansKRFamily,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Medium,
+                color = Accent,
+                letterSpacing = 0.04.em,
+            )
 
-            // Header
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(TaekyonOrange),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("T", color = TaekyonTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text(
-                        "TAEKYON TRAINER",
-                        color = TaekyonTextPrimary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        "AI TRAINING PARTNER",
-                        color = TaekyonTextSecondary,
-                        fontSize = 10.sp,
-                        letterSpacing = 1.sp
-                    )
-                }
-            }
+            Spacer(Modifier.height(14.dp))
 
-            Spacer(Modifier.height(24.dp))
+            // Wordmark
+            Text(
+                "TAEKYON",
+                fontFamily = SpaceGroteskFamily,
+                fontSize = 64.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Fg,
+                letterSpacing = (-0.04).em,
+                lineHeight = (64 * 0.92).sp,
+            )
 
-            // Duration card
+            // Accent rule
+            Spacer(Modifier.height(16.dp))
+            Box(Modifier.width(48.dp).height(2.dp).background(Accent))
+
+            // Subtitle
+            Spacer(Modifier.height(14.dp))
+            Text(
+                "Trainer · Korean martial reaction drill",
+                fontFamily = SpaceGroteskFamily,
+                fontSize = 17.sp,
+                color = Mute,
+            )
+
+            // About card
+            Spacer(Modifier.height(40.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(TaekyonSurface)
-                    .padding(16.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Surface)
+                    .border(1.dp, Line, RoundedCornerShape(18.dp))
+                    .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 16.dp)
             ) {
                 Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("⏱", fontSize = 13.sp)
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            "TRAINING DURATION",
-                            color = TaekyonTextSecondary,
-                            fontSize = 11.sp,
-                            letterSpacing = 2.sp
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        DurationColumn(
-                            value = minutes,
-                            label = "MIN",
-                            onInc = { if (minutes < 99) minutes++ },
-                            onDec = { if (minutes > 0) minutes-- }
-                        )
-                        Text(
-                            ":",
-                            color = TaekyonTextPrimary,
-                            fontSize = 44.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        DurationColumn(
-                            value = seconds,
-                            label = "SEC",
-                            onInc = { seconds = (seconds + 1) % 60 },
-                            onDec = { seconds = if (seconds == 0) 59 else seconds - 1 }
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            // Moves header row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MonoLabel("About", size = 10)
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        "SELECT MOVES",
-                        color = TaekyonTextPrimary,
+                        "Watch the opponent. React in real time.\nNo scoring. No pose tracking. Just rhythm.",
+                        fontFamily = SpaceGroteskFamily,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp
+                        color = Mute,
+                        lineHeight = (13 * 1.55).sp,
                     )
-                    if (selected.isNotEmpty()) {
-                        Spacer(Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(TaekyonOrange),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "${selected.size}",
-                                color = TaekyonTextPrimary,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    }
                 }
-                Row {
-                    TextButton(onClick = { selected.clear(); selected.addAll(moves) }) {
-                        Text("All", color = TaekyonTextSecondary, fontSize = 13.sp)
-                    }
-                    TextButton(onClick = { selected.clear() }) {
-                        Text("Clear", color = TaekyonTextSecondary, fontSize = 13.sp)
-                    }
+            }
+        }
+
+        // Primary CTA
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(horizontal = 22.dp, vertical = 30.dp)
+        ) {
+            Button(
+                onClick = onContinue,
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = Accent, contentColor = AccentInk),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+            ) {
+                Text(
+                    "Begin training",
+                    fontFamily = SpaceGroteskFamily,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.01.em,
+                )
+            }
+        }
+    }
+}
+
+// ─── Setup ──────────────────────────────────────────────────────────────────
+
+@Composable
+private fun SetupScreen(
+    seconds: Int,
+    enabledMoves: Set<String>,
+    onSecondsChange: (Int) -> Unit,
+    onMovesChange: (Set<String>) -> Unit,
+    onBack: () -> Unit,
+    onStart: () -> Unit,
+) {
+    val canStart = enabledMoves.isNotEmpty()
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Bg)
+            .statusBarsPadding()
+    ) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Back button
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onBack,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(Modifier.size(20.dp)) {
+                    val s = size
+                    drawPath(
+                        path = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(s.width * 0.625f, s.height * 0.2f)
+                            lineTo(s.width * 0.325f, s.height * 0.5f)
+                            lineTo(s.width * 0.625f, s.height * 0.8f)
+                        },
+                        color = Fg,
+                        style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+                    )
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-
-            // Moves list
-            moves.forEach { move ->
-                val isSelected = move in selected
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (isSelected) Color(0xFF2A1810) else TaekyonSurface)
-                        .border(
-                            width = if (isSelected) 1.dp else 0.dp,
-                            color = if (isSelected) TaekyonOrange else Color.Transparent,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .clickable { if (isSelected) selected.remove(move) else selected.add(move) }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        move.replace('_', ' ').split(' ')
-                            .joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } },
-                        color = if (isSelected) TaekyonTextPrimary else TaekyonTextSecondary,
-                        fontSize = 15.sp,
-                        fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(22.dp)
-                            .clip(RoundedCornerShape(11.dp))
-                            .background(if (isSelected) TaekyonOrange else Color.Transparent)
-                            .border(
-                                width = 1.5.dp,
-                                color = if (isSelected) TaekyonOrange else TaekyonTextSecondary,
-                                shape = RoundedCornerShape(11.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isSelected) {
-                            Text("✓", color = TaekyonTextPrimary, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
+            // Title
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    "Session setup",
+                    fontFamily = SpaceGroteskFamily,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Fg,
+                    letterSpacing = (-0.01).em,
+                )
+                Text(
+                    "훈련 준비",
+                    fontFamily = NotoSansKRFamily,
+                    fontSize = 10.sp,
+                    color = Mute2,
+                    letterSpacing = 0.04.em,
+                )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.width(32.dp))
+        }
+
+        // Scrollable body
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+        ) {
+            DurationSection(seconds, onSecondsChange)
+            Spacer(Modifier.height(26.dp))
+            TechniquesSection(enabledMoves, onMovesChange)
+        }
+
+        // Footer CTA
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .background(Bg)
+                .navigationBarsPadding()
+                .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 22.dp)
+        ) {
+            Button(
+                onClick = { if (canStart) onStart() },
+                enabled = canStart,
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Accent,
+                    contentColor = AccentInk,
+                    disabledContainerColor = Surface2,
+                    disabledContentColor = Mute2,
+                ),
+            ) {
+                Text(
+                    if (canStart) "Start · ${MotionLibrary.fmtMSS(seconds)}"
+                    else "Pick at least one variant",
+                    fontFamily = SpaceGroteskFamily,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        }
+    }
+}
+
+// ─── Duration section ────────────────────────────────────────────────────────
+
+@Composable
+private fun DurationSection(seconds: Int, onSecondsChange: (Int) -> Unit) {
+    val clamp = { s: Int -> s.coerceIn(15, 300) }
+
+    // Section label row
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        MonoLabel("Duration", color = Mute, size = 11)
+        MonoLabel("30s – 5m", color = Mute2, size = 10)
+    }
+
+    Spacer(Modifier.height(12.dp))
+
+    // Big display card
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(Surface)
+            .border(1.dp, Line, RoundedCornerShape(18.dp))
+            .padding(horizontal = 22.dp, vertical = 20.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StepperButton("–15s") { onSecondsChange(clamp(seconds - 15)) }
+
+            Text(
+                MotionLibrary.fmtMSS(seconds),
+                fontFamily = GeistMonoFamily,
+                fontSize = 64.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Fg,
+                letterSpacing = (-0.04).em,
+            )
+
+            StepperButton("+15s") { onSecondsChange(clamp(seconds + 15)) }
+        }
+    }
+
+    Spacer(Modifier.height(10.dp))
+
+    // Preset chips
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        MotionLibrary.durationPresets.forEach { preset ->
+            val active = seconds == preset
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(36.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (active) Accent else androidx.compose.ui.graphics.Color.Transparent)
+                    .border(1.dp, if (active) Accent else Line, RoundedCornerShape(12.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onSecondsChange(preset) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    MotionLibrary.fmtMSS(preset),
+                    fontFamily = GeistMonoFamily,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (active) AccentInk else Fg,
+                    letterSpacing = 0.04.em,
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun DurationColumn(value: Int, label: String, onInc: () -> Unit, onDec: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(onClick = onInc) {
-            Text("+", color = TaekyonTextSecondary, fontSize = 24.sp, fontWeight = FontWeight.Light)
+private fun StepperButton(label: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(56.dp)
+            .height(32.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, Line, RoundedCornerShape(12.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, fontFamily = GeistMonoFamily, fontSize = 11.sp, color = Mute, letterSpacing = 0.04.em)
+    }
+}
+
+// ─── Techniques section ──────────────────────────────────────────────────────
+
+@Composable
+private fun TechniquesSection(enabledMoves: Set<String>, onMovesChange: (Set<String>) -> Unit) {
+    val readyCount = MotionLibrary.techniques
+        .flatMap { it.heights }
+        .count { it.status == Status.Ready }
+
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        MonoLabel("Techniques", color = Mute, size = 11)
+        MonoLabel("${enabledMoves.size} selected", color = Mute2, size = 10)
+    }
+
+    Spacer(Modifier.height(12.dp))
+
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        MotionLibrary.techniques.forEach { tech ->
+            TechniqueCard(tech, enabledMoves, onMovesChange)
         }
+    }
+
+    Spacer(Modifier.height(16.dp))
+
+    // Footer hint card
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .dashedBorder(Line, radius = 12.dp)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Text("◆", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Accent)
         Text(
-            text = "%02d".format(value),
-            color = TaekyonTextPrimary,
-            fontSize = 44.sp,
-            fontWeight = FontWeight.Bold
+            "New variants unlock as motion clips are captured. Current build: $readyCount ready · 7 planned.",
+            fontFamily = GeistMonoFamily,
+            fontSize = 10.sp,
+            color = Mute2,
+            lineHeight = (10 * 1.5).sp,
+            letterSpacing = 0.02.em,
         )
-        Text(label, color = TaekyonTextSecondary, fontSize = 11.sp, letterSpacing = 2.sp)
-        IconButton(onClick = onDec) {
-            Text("−", color = TaekyonTextSecondary, fontSize = 24.sp, fontWeight = FontWeight.Light)
+    }
+}
+
+@Composable
+private fun TechniqueCard(
+    tech: TechniqueFamily,
+    enabledMoves: Set<String>,
+    onMovesChange: (Set<String>) -> Unit,
+) {
+    val anyOn = tech.heights.any { it.id in enabledMoves }
+    val isReady = tech.status == Status.Ready
+
+    if (!isReady) {
+        // Compact planned row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(0.55f)
+                .clip(RoundedCornerShape(18.dp))
+                .background(Surface)
+                .border(1.dp, Line, RoundedCornerShape(18.dp))
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(tech.name, fontFamily = SpaceGroteskFamily, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Fg)
+            Text(tech.hangul, fontFamily = NotoSansKRFamily, fontSize = 12.sp, color = Mute)
+            Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Mute2, letterSpacing = 0.05.em)
+            Spacer(Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(1.dp, Line, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text("soon", fontFamily = GeistMonoFamily, fontSize = 9.sp, color = Mute2, letterSpacing = 0.22.em)
+            }
         }
+        return
+    }
+
+    // Full ready card
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(if (anyOn) AccentDim else Surface)
+            .border(1.dp, if (anyOn) Accent else Line, RoundedCornerShape(18.dp))
+            .padding(14.dp)
+    ) {
+        Column {
+            // Title row
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(tech.name, fontFamily = SpaceGroteskFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Fg, letterSpacing = (-0.01).em)
+                Text(tech.hangul, fontFamily = NotoSansKRFamily, fontSize = 13.sp, color = Mute)
+                Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Mute2, letterSpacing = 0.05.em)
+            }
+
+            Spacer(Modifier.height(6.dp))
+
+            Text(tech.desc, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = Mute, lineHeight = (12 * 1.4).sp)
+
+            Spacer(Modifier.height(12.dp))
+
+            // Height chips
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                tech.heights.forEach { h ->
+                    HeightChip(
+                        chip = h,
+                        isOn = h.id in enabledMoves,
+                        onToggle = {
+                            val next = if (h.id in enabledMoves) enabledMoves - h.id else enabledMoves + h.id
+                            onMovesChange(next)
+                        },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeightChip(chip: HeightVariant, isOn: Boolean, onToggle: () -> Unit) {
+    val isReady = chip.status == Status.Ready
+    val borderColor = when {
+        isOn    -> Accent
+        isReady -> LineStrong
+        else    -> Line
+    }
+    val bgColor = if (isOn) Accent else androidx.compose.ui.graphics.Color.Transparent
+    val textColor = if (isOn) AccentInk else if (isReady) Fg else Mute2
+
+    Row(
+        modifier = Modifier
+            .alpha(if (isReady) 1f else 0.6f)
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor)
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .then(
+                if (isReady) Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onToggle,
+                ) else Modifier
+            )
+            .padding(start = 8.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        // Checkbox
+        val checkBorder = if (isOn) AccentInk else if (isReady) LineStrong else Line
+        Box(
+            modifier = Modifier
+                .size(14.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(if (isOn) AccentInk else androidx.compose.ui.graphics.Color.Transparent)
+                .border(1.5.dp, checkBorder, RoundedCornerShape(4.dp)),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (isOn) {
+                Canvas(Modifier.size(9.dp)) {
+                    // Checkmark: M2.5 6.5 L5 9 L9.5 3.5 in 12×12 space scaled to 9×9
+                    val sc = size.width / 12f
+                    drawPath(
+                        path = androidx.compose.ui.graphics.Path().apply {
+                            moveTo(2.5f * sc, 6.5f * sc)
+                            lineTo(5.0f * sc, 9.0f * sc)
+                            lineTo(9.5f * sc, 3.5f * sc)
+                        },
+                        color = Accent,
+                        style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+                    )
+                }
+            }
+        }
+
+        Text(chip.label, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = textColor)
+
+        Text(
+            if (isReady) "· ${chip.variants}V" else "· SOON",
+            fontFamily = GeistMonoFamily,
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Medium,
+            color = if (isOn) AccentInk else Mute2,
+            letterSpacing = 0.1.em,
+        )
     }
 }

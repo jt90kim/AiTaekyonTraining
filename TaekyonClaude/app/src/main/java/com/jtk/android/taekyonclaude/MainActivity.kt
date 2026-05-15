@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jtk.android.taekyonclaude.ui.theme.TaekyonClaudeTheme
+import com.unity3d.player.UnityPlayer
 import com.unity3d.player.UnityPlayerGameActivity
 import kotlinx.coroutines.delay
 
@@ -24,10 +25,12 @@ class MainActivity : UnityPlayerGameActivity() {
     private val _unityReady = mutableStateOf(false)
     private val _durationSeconds = mutableIntStateOf(180)
     private val _sessionKey = mutableIntStateOf(0)
+    private var _enabledMovesCsv = "roundhouse_low"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
+        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
 
         addContentView(
             ComposeView(this).apply {
@@ -37,35 +40,44 @@ class MainActivity : UnityPlayerGameActivity() {
                         key(_sessionKey.intValue) {
                             TrainingOverlay(
                                 durationSeconds = _durationSeconds.intValue,
-                                unityReady = _unityReady.value
+                                unityReady = _unityReady.value,
                             )
                         }
                     }
                 }
             },
-            android.view.ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            android.view.ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT),
         )
     }
 
-    // Called when a new "Start Training" intent arrives while activity is already alive
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
-        _sessionKey.intValue++  // Forces TrainingOverlay to recreate with fresh state
-        // Unity scene is still loaded; signal ready so timer starts immediately
-        runOnUiThread { _unityReady.value = true }
+        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
+        _sessionKey.intValue++
+        runOnUiThread {
+            _unityReady.value = true
+            sendEnabledMoves()
+        }
     }
 
-    // Called from Unity's AndroidBridge.Start() once the scene is loaded on first launch
     fun onUnitySceneReady() {
-        runOnUiThread { _unityReady.value = true }
+        runOnUiThread {
+            _unityReady.value = true
+            sendEnabledMoves()
+        }
+    }
+
+    private fun sendEnabledMoves() {
+        try {
+            UnityPlayer.UnitySendMessage("AndroidBridge", "SetEnabledMoves", _enabledMovesCsv)
+        } catch (e: Exception) {
+            android.util.Log.w("MainActivity", "SetEnabledMoves failed: ${e.message}")
+        }
     }
 
     private fun navigateBack() {
-        // Bring LauncherActivity's task to the foreground without destroying this activity.
-        // Calling finish() here would trigger UnityPlayerGameActivity.onDestroy() which calls
-        // System.exit() from native code — killing the whole process.
         startActivity(
             Intent(this, LauncherActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -104,14 +116,14 @@ class MainActivity : UnityPlayerGameActivity() {
                     .align(Alignment.TopCenter)
                     .padding(top = 24.dp),
                 shape = MaterialTheme.shapes.extraLarge,
-                color = Color.Black.copy(alpha = 0.60f)
+                color = Color.Black.copy(alpha = 0.60f),
             ) {
                 Text(
                     text = if (unityReady) timerText else "–:––",
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (done) Color(0xFFFF6633) else Color.White
+                    color = if (done) Color(0xFFFF6633) else Color.White,
                 )
             }
 
@@ -119,14 +131,9 @@ class MainActivity : UnityPlayerGameActivity() {
                 onClick = { navigateBack() },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 16.dp, end = 12.dp)
+                    .padding(top = 16.dp, end = 12.dp),
             ) {
-                Text(
-                    text = "✕",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.80f)
-                )
+                Text("✕", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.80f))
             }
 
             if (done) {
@@ -134,15 +141,10 @@ class MainActivity : UnityPlayerGameActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.70f)),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = "Training Complete",
-                            fontSize = 36.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
+                        Text("Training Complete", fontSize = 36.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = { navigateBack() }) {
                             Text("Exit", fontSize = 18.sp)

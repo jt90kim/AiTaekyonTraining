@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.ui:ui-text-google-fonts")
+    implementation("androidx.compose.material:material-icons-core")
     implementation(project(":unityLibrary"))
     implementation("androidx.games:games-activity:3.0.5")
     implementation("androidx.appcompat:appcompat:1.6.1")
