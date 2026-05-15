@@ -74,7 +74,7 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | Move probability | 95% |
 | Idle duration | 0 (no pause between actions) |
 | Transition speed | 3× |
-| Move (kick) speed | 2.5× |
+| Move (kick) speed | 4× |
 
 ### Visual system (DebugSkeletonRenderer.cs)
 
@@ -118,7 +118,17 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
   height   = low | high     (target height of the kick)
 ```
 
-**Next:** Android integration testing — verify `SetEnabledMoves` bridge from Android UI correctly filters move variants in Unity.
+### Android ↔ Unity integration status
+
+| Item | Status |
+|---|---|
+| `onUnitySceneReady()` callback | ✅ Wired — Unity calls Android when scene loads; Android starts timer after this |
+| `SetEnabledMoves(csv)` bridge | ✅ Wired — Android sends CSV of enabled move type IDs; Unity state machine filters variants |
+| Move ID alignment | ✅ Confirmed — Android uses `roundhouse_low`, all 4 Unity `MoveVariant.moveType` fields are `roundhouse_low` |
+| `roundhouse_high` / `split_kick_low` in Android catalog | ⚠️ Listed in `MotionLibrary.kt` but no Unity variants exist — silently fire nothing if selected |
+| `ReceiveMotionMessage` (direct JSON path) | 🗄️ Wired but unused — superseded by state machine |
+
+**Next:** End-to-end Android build + device test. Verify timer, SetEnabledMoves filtering, and back-button flow on device.
 
 ## Non-Goals
 
