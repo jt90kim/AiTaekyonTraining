@@ -519,113 +519,67 @@ private fun TechniqueCard(
         return
     }
 
-    // Full ready card
+    // Full ready card — tap to toggle all ready variants in this family
+    val readyIds = tech.heights.filter { it.status == Status.Ready }.map { it.id }.toSet()
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
             .background(if (anyOn) AccentDim else Surface)
             .border(1.dp, if (anyOn) Accent else Line, RoundedCornerShape(18.dp))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ) {
+                onMovesChange(if (anyOn) enabledMoves - readyIds else enabledMoves + readyIds)
+            }
             .padding(14.dp)
     ) {
         Column {
-            // Title row
+            // Title row with checkmark indicator
             Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(tech.name, fontFamily = SpaceGroteskFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Fg, letterSpacing = (-0.01).em)
-                Text(tech.hangul, fontFamily = NotoSansKRFamily, fontSize = 13.sp, color = Mute)
-                Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Mute2, letterSpacing = 0.05.em)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(tech.name, fontFamily = SpaceGroteskFamily, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Fg, letterSpacing = (-0.01).em)
+                    Text(tech.hangul, fontFamily = NotoSansKRFamily, fontSize = 13.sp, color = Mute)
+                    Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Mute2, letterSpacing = 0.05.em)
+                }
+                // On/off indicator
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(if (anyOn) Accent else androidx.compose.ui.graphics.Color.Transparent)
+                        .border(1.5.dp, if (anyOn) Accent else LineStrong, RoundedCornerShape(6.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    if (anyOn) {
+                        Canvas(Modifier.size(11.dp)) {
+                            val sc = size.width / 12f
+                            drawPath(
+                                path = androidx.compose.ui.graphics.Path().apply {
+                                    moveTo(2.5f * sc, 6.5f * sc)
+                                    lineTo(5.0f * sc, 9.0f * sc)
+                                    lineTo(9.5f * sc, 3.5f * sc)
+                                },
+                                color = AccentInk,
+                                style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(Modifier.height(6.dp))
 
             Text(tech.desc, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = Mute, lineHeight = (12 * 1.4).sp)
-
-            Spacer(Modifier.height(12.dp))
-
-            // Height chips
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                tech.heights.forEach { h ->
-                    HeightChip(
-                        chip = h,
-                        isOn = h.id in enabledMoves,
-                        onToggle = {
-                            val next = if (h.id in enabledMoves) enabledMoves - h.id else enabledMoves + h.id
-                            onMovesChange(next)
-                        },
-                    )
-                }
-            }
         }
     }
 }
 
-@Composable
-private fun HeightChip(chip: HeightVariant, isOn: Boolean, onToggle: () -> Unit) {
-    val isReady = chip.status == Status.Ready
-    val borderColor = when {
-        isOn    -> Accent
-        isReady -> LineStrong
-        else    -> Line
-    }
-    val bgColor = if (isOn) Accent else androidx.compose.ui.graphics.Color.Transparent
-    val textColor = if (isOn) AccentInk else if (isReady) Fg else Mute2
-
-    Row(
-        modifier = Modifier
-            .alpha(if (isReady) 1f else 0.6f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(bgColor)
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-            .then(
-                if (isReady) Modifier.clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onToggle,
-                ) else Modifier
-            )
-            .padding(start = 8.dp, end = 10.dp, top = 6.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        // Checkbox
-        val checkBorder = if (isOn) AccentInk else if (isReady) LineStrong else Line
-        Box(
-            modifier = Modifier
-                .size(14.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(if (isOn) AccentInk else androidx.compose.ui.graphics.Color.Transparent)
-                .border(1.5.dp, checkBorder, RoundedCornerShape(4.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (isOn) {
-                Canvas(Modifier.size(9.dp)) {
-                    // Checkmark: M2.5 6.5 L5 9 L9.5 3.5 in 12×12 space scaled to 9×9
-                    val sc = size.width / 12f
-                    drawPath(
-                        path = androidx.compose.ui.graphics.Path().apply {
-                            moveTo(2.5f * sc, 6.5f * sc)
-                            lineTo(5.0f * sc, 9.0f * sc)
-                            lineTo(9.5f * sc, 3.5f * sc)
-                        },
-                        color = Accent,
-                        style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
-                    )
-                }
-            }
-        }
-
-        Text(chip.label, fontFamily = SpaceGroteskFamily, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = textColor)
-
-        Text(
-            if (isReady) "· ${chip.variants}V" else "· SOON",
-            fontFamily = GeistMonoFamily,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Medium,
-            color = if (isOn) AccentInk else Mute2,
-            letterSpacing = 0.1.em,
-        )
-    }
-}
