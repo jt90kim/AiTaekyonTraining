@@ -438,9 +438,9 @@ private fun StepperButton(label: String, onClick: () -> Unit) {
 
 @Composable
 private fun TechniquesSection(enabledMoves: Set<String>, onMovesChange: (Set<String>) -> Unit) {
-    val readyCount = MotionLibrary.techniques
-        .flatMap { it.heights }
-        .count { it.status == Status.Ready }
+    val allHeights = MotionLibrary.techniques.flatMap { it.heights }
+    val readyCount = allHeights.count { it.status == Status.Ready }
+    val soonCount  = allHeights.count { it.status == Status.Soon }
 
     Row(
         Modifier.fillMaxWidth(),
@@ -471,7 +471,7 @@ private fun TechniquesSection(enabledMoves: Set<String>, onMovesChange: (Set<Str
     ) {
         Text("◆", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = Accent)
         Text(
-            "New variants unlock as motion clips are captured. Current build: $readyCount ready · 7 planned.",
+            "New variants unlock as motion clips are captured. Current build: $readyCount ready · $soonCount planned.",
             fontFamily = GeistMonoFamily,
             fontSize = 10.sp,
             color = Mute2,
