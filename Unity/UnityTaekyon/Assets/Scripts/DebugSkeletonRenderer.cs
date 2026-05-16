@@ -75,13 +75,16 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void UpdateHeadSphere()
     {
-        Transform nose = mapper.GetJoint("nose");
-        Transform lEar = mapper.GetJoint("left_ear");
-        Transform rEar = mapper.GetJoint("right_ear");
-        if (nose != null && lEar != null && rEar != null)
-            _headSphere.transform.position = (nose.position + lEar.position + rEar.position) / 3f;
-        else if (lEar != null && rEar != null)
-            _headSphere.transform.position = (lEar.position + rEar.position) * 0.5f;
+        Transform nose      = mapper.GetJoint("nose");
+        Transform lShoulder = mapper.GetJoint("left_shoulder");
+        Transform rShoulder = mapper.GetJoint("right_shoulder");
+
+        if (nose != null && lShoulder != null && rShoulder != null)
+        {
+            // Shoulder midpoint gives the body-axis X/Z; nose gives the correct height.
+            Vector3 mid = (lShoulder.position + rShoulder.position) * 0.5f;
+            _headSphere.transform.position = new Vector3(mid.x, nose.position.y, mid.z);
+        }
         else if (nose != null)
             _headSphere.transform.position = nose.position;
     }
