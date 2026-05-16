@@ -17,12 +17,9 @@ public static class SkeletonDefinition
     };
 
     // Each entry is (fromJoint, toJoint)
+    // Head joints are omitted — the head is rendered as a sphere in DebugSkeletonRenderer.
     public static readonly (string, string)[] Bones =
     {
-        // Head
-        ("left_ear",  "nose"),
-        ("right_ear", "nose"),
-
         // Torso
         ("left_shoulder",  "right_shoulder"),
         ("left_shoulder",  "left_hip"),
