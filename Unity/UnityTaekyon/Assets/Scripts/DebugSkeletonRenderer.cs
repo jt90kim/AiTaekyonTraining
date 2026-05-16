@@ -75,9 +75,15 @@ public class DebugSkeletonRenderer : MonoBehaviour
 
     private void UpdateHeadSphere()
     {
-        Transform nose = mapper.GetJoint("nose");
-        if (nose != null)
-            _headSphere.transform.position = nose.position;
+        Transform lEar = mapper.GetJoint("left_ear");
+        Transform rEar = mapper.GetJoint("right_ear");
+        if (lEar != null && rEar != null)
+            _headSphere.transform.position = (lEar.position + rEar.position) * 0.5f;
+        else
+        {
+            Transform nose = mapper.GetJoint("nose");
+            if (nose != null) _headSphere.transform.position = nose.position;
+        }
     }
 
     private void CreateFloorGrid()
