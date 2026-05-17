@@ -118,7 +118,7 @@ public class MotionStateMachine : MonoBehaviour
             var candidates = new List<MoveVariant>();
             foreach (var mv in moveVariants)
             {
-                if (_enabledMoveTypes.Contains(mv.moveType) && mv.fromStance == _currentStance)
+                if (mv.clip != null && _enabledMoveTypes.Contains(mv.moveType) && mv.fromStance == _currentStance)
                     candidates.Add(mv);
             }
 

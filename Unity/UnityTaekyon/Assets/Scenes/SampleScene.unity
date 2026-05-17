@@ -544,6 +544,66 @@ MonoBehaviour:
     clip: {fileID: 4900000, guid: f021ec33d73c6574d8489a5f3b69ffc8, type: 3}
     blendIn: 0.1
     blendOut: 0.4
+  - moveType: split_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: split_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: split_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: split_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: shin_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: shin_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: shin_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: shin_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: heel_hook_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: heel_hook_low
+    fromStance: left_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: heel_hook_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: heel_hook_low
+    fromStance: right_forward
+    clip: {fileID: 0}
+    blendIn: 0.1
+    blendOut: 0.4
   moveProbability: 0.95
   minIdleDuration: 0
   maxIdleDuration: 0
