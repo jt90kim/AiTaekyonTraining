@@ -33,30 +33,12 @@ object MotionLibrary {
             ),
         ),
         TechniqueFamily(
-            id = "split", name = "Split Kick",
+            id = "split", name = "Splint Kick",
             hangul = "내차기", romaja = "Nae-chagi",
             desc = "Inward sweeping arc — shin travels across the centerline",
             status = Status.Soon,
             heights = listOf(
                 HeightVariant("split_low", "Low", 4, Status.Soon),
-            ),
-        ),
-        TechniqueFamily(
-            id = "shin", name = "Shin Kick",
-            hangul = "촞대차기", romaja = "Chokdae-chagi",
-            desc = "Rising strike delivered with the shin bone",
-            status = Status.Soon,
-            heights = listOf(
-                HeightVariant("shin_low", "Low", 4, Status.Soon),
-            ),
-        ),
-        TechniqueFamily(
-            id = "heel_hook", name = "Heel Hook Kick",
-            hangul = "정강차기", romaja = "Jeonggang-chagi",
-            desc = "Hooking return — heel whips back across the target",
-            status = Status.Soon,
-            heights = listOf(
-                HeightVariant("heel_hook_low", "Low", 4, Status.Soon),
             ),
         ),
     )

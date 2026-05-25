@@ -101,9 +101,9 @@ Same as above but kick extends to chest/head height.
 
 ---
 
-### Low split kick variants / 내차기 (4 clips)
+### Low splint kick variants / 내차기 (4 clips)
 
-The split kick sweeps the shin inward across the centerline in a rising arc. The motion is: shift weight → raise knee inward → extend shin across → retract → hold end pose.
+The splint kick sweeps the shin inward across the centerline in a rising arc. The motion is: shift weight → raise knee inward → extend shin across → retract → hold end pose.
 
 | Output filename | Starting stance | Kicking leg | What to perform |
 |---|---|---|---|
@@ -111,36 +111,6 @@ The split kick sweeps the shin inward across the centerline in a rising arc. The
 | `split_left_rear_low.json` | Left foot forward | Rear (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
 | `split_right_front_low.json` | Right foot forward | Front (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
 | `split_right_rear_low.json` | Right foot forward | Rear (left) leg | Raise left knee inward, sweep shin across low, retract, hold |
-
-Duration per clip: ~1.5–2 s
-
----
-
-### Low shin kick variants / 촞대차기 (4 clips)
-
-The shin kick drives the shin bone upward and forward into the target. The motion is: step into position → drive knee up → extend shin forward and upward at low height → retract → hold end pose.
-
-| Output filename | Starting stance | Kicking leg | What to perform |
-|---|---|---|---|
-| `shin_left_front_low.json` | Left foot forward | Front (left) leg | Drive left shin up and forward low, retract, hold |
-| `shin_left_rear_low.json` | Left foot forward | Rear (right) leg | Drive right shin up and forward low, retract, hold |
-| `shin_right_front_low.json` | Right foot forward | Front (right) leg | Drive right shin up and forward low, retract, hold |
-| `shin_right_rear_low.json` | Right foot forward | Rear (left) leg | Drive left shin up and forward low, retract, hold |
-
-Duration per clip: ~1.5–2 s
-
----
-
-### Low heel hook kick variants / 정강차기 (4 clips)
-
-The heel hook kick extends the leg past the target, then whips the heel back across it in a hooking return. The motion is: extend leg forward → pivot/hook the heel back across → retract → hold end pose.
-
-| Output filename | Starting stance | Kicking leg | What to perform |
-|---|---|---|---|
-| `heel_hook_left_front_low.json` | Left foot forward | Front (left) leg | Extend left leg, hook heel back across low, retract, hold |
-| `heel_hook_left_rear_low.json` | Left foot forward | Rear (right) leg | Extend right leg, hook heel back across low, retract, hold |
-| `heel_hook_right_front_low.json` | Right foot forward | Front (right) leg | Extend right leg, hook heel back across low, retract, hold |
-| `heel_hook_right_rear_low.json` | Right foot forward | Rear (left) leg | Extend left leg, hook heel back across low, retract, hold |
 
 Duration per clip: ~1.5–2 s
 
@@ -202,31 +172,13 @@ python tools/extract_motion.py roundhouse_right_front_high.mp4  roundhouse_right
 python tools/extract_motion.py roundhouse_right_rear_high.mp4   roundhouse_right_rear_high.json
 ```
 
-### Commands — low split kicks / 내차기
+### Commands — low splint kicks / 내차기
 
 ```bash
 python tools/extract_motion.py split_left_front_low.mp4    split_left_front_low.json
 python tools/extract_motion.py split_left_rear_low.mp4     split_left_rear_low.json
 python tools/extract_motion.py split_right_front_low.mp4   split_right_front_low.json
 python tools/extract_motion.py split_right_rear_low.mp4    split_right_rear_low.json
-```
-
-### Commands — low shin kicks / 촞대차기
-
-```bash
-python tools/extract_motion.py shin_left_front_low.mp4    shin_left_front_low.json
-python tools/extract_motion.py shin_left_rear_low.mp4     shin_left_rear_low.json
-python tools/extract_motion.py shin_right_front_low.mp4   shin_right_front_low.json
-python tools/extract_motion.py shin_right_rear_low.mp4    shin_right_rear_low.json
-```
-
-### Commands — low heel hook kicks / 정강차기
-
-```bash
-python tools/extract_motion.py heel_hook_left_front_low.mp4    heel_hook_left_front_low.json
-python tools/extract_motion.py heel_hook_left_rear_low.mp4     heel_hook_left_rear_low.json
-python tools/extract_motion.py heel_hook_right_front_low.mp4   heel_hook_right_front_low.json
-python tools/extract_motion.py heel_hook_right_rear_low.mp4    heel_hook_right_rear_low.json
 ```
 
 ### Sanity-checking the output
