@@ -544,22 +544,22 @@ MonoBehaviour:
     clip: {fileID: 4900000, guid: f021ec33d73c6574d8489a5f3b69ffc8, type: 3}
     blendIn: 0.1
     blendOut: 0.4
-  - moveType: split_low
+  - moveType: splint_low
     fromStance: left_forward
     clip: {fileID: 0}
     blendIn: 0.1
     blendOut: 0.4
-  - moveType: split_low
+  - moveType: splint_low
     fromStance: left_forward
     clip: {fileID: 0}
     blendIn: 0.1
     blendOut: 0.4
-  - moveType: split_low
+  - moveType: splint_low
     fromStance: right_forward
     clip: {fileID: 0}
     blendIn: 0.1
     blendOut: 0.4
-  - moveType: split_low
+  - moveType: splint_low
     fromStance: right_forward
     clip: {fileID: 0}
     blendIn: 0.1
