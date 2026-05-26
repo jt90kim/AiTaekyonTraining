@@ -608,7 +608,7 @@ MonoBehaviour:
   minIdleDuration: 0
   maxIdleDuration: 0
   blendToIdle: 0.3
-  movePlaybackSpeed: 4
+  movePlaybackSpeed: 1.5
   transitionPlaybackSpeed: 3
 --- !u!1 &832575517
 GameObject:
