@@ -564,6 +564,46 @@ MonoBehaviour:
     clip: {fileID: 4900000, guid: 47fa07f47e0e48bab797489948f28b2f, type: 3}
     blendIn: 0.1
     blendOut: 0.4
+  - moveType: roundhouse_high
+    fromStance: left_forward
+    clip: {fileID: 4900000, guid: 9864afc8f12a48caadfc5624b30c549e, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: roundhouse_high
+    fromStance: left_forward
+    clip: {fileID: 4900000, guid: de780425f5b84f60a99af18d7b7ea2c1, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: roundhouse_high
+    fromStance: right_forward
+    clip: {fileID: 4900000, guid: bb18e88529c74995a0224d4f4fd22602, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: roundhouse_high
+    fromStance: right_forward
+    clip: {fileID: 4900000, guid: 118f09595e7742548b22fad8527e0e07, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: splint_high
+    fromStance: left_forward
+    clip: {fileID: 4900000, guid: 018e22dffe6b4740b08890eacfe13246, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: splint_high
+    fromStance: left_forward
+    clip: {fileID: 4900000, guid: 43cceb06154249f8b514955f0d91a4ab, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: splint_high
+    fromStance: right_forward
+    clip: {fileID: 4900000, guid: 891660b9bd8445189f5b641307e0d87d, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
+  - moveType: splint_high
+    fromStance: right_forward
+    clip: {fileID: 4900000, guid: 5085b2be86574e7fa6b372f787e5b545, type: 3}
+    blendIn: 0.1
+    blendOut: 0.4
   - moveType: shin_low
     fromStance: left_forward
     clip: {fileID: 0}
