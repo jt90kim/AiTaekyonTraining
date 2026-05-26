@@ -107,10 +107,10 @@ The splint kick sweeps the shin inward across the centerline in a rising arc. Th
 
 | Output filename | Starting stance | Kicking leg | What to perform |
 |---|---|---|---|
-| `split_left_front_low.json` | Left foot forward | Front (left) leg | Raise left knee inward, sweep shin across low, retract, hold |
-| `split_left_rear_low.json` | Left foot forward | Rear (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
-| `split_right_front_low.json` | Right foot forward | Front (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
-| `split_right_rear_low.json` | Right foot forward | Rear (left) leg | Raise left knee inward, sweep shin across low, retract, hold |
+| `splint_left_front_low.json` | Left foot forward | Front (left) leg | Raise left knee inward, sweep shin across low, retract, hold |
+| `splint_left_rear_low.json` | Left foot forward | Rear (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
+| `splint_right_front_low.json` | Right foot forward | Front (right) leg | Raise right knee inward, sweep shin across low, retract, hold |
+| `splint_right_rear_low.json` | Right foot forward | Rear (left) leg | Raise left knee inward, sweep shin across low, retract, hold |
 
 Duration per clip: ~1.5–2 s
 
@@ -175,10 +175,10 @@ python tools/extract_motion.py roundhouse_right_rear_high.mp4   roundhouse_right
 ### Commands — low splint kicks / 내차기
 
 ```bash
-python tools/extract_motion.py split_left_front_low.mp4    split_left_front_low.json
-python tools/extract_motion.py split_left_rear_low.mp4     split_left_rear_low.json
-python tools/extract_motion.py split_right_front_low.mp4   split_right_front_low.json
-python tools/extract_motion.py split_right_rear_low.mp4    split_right_rear_low.json
+python tools/extract_motion.py splint_left_front_low.mp4    splint_left_front_low.json
+python tools/extract_motion.py splint_left_rear_low.mp4     splint_left_rear_low.json
+python tools/extract_motion.py splint_right_front_low.mp4   splint_right_front_low.json
+python tools/extract_motion.py splint_right_rear_low.mp4    splint_right_rear_low.json
 ```
 
 ### Sanity-checking the output
