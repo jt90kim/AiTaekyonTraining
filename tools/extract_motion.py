@@ -58,10 +58,6 @@ def _rot_y(pos: list, cos_a: float, sin_a: float) -> list:
     return [round(cos_a * x - sin_a * z, 4), y, round(sin_a * x + cos_a * z, 4)]
 
 
-def _rot_z(pos: list, cos_a: float, sin_a: float) -> list:
-    x, y, z = pos
-    return [round(cos_a * x - sin_a * y, 4), round(sin_a * x + cos_a * y, 4), z]
-
 
 def apply_facing_correction(frames_out: list) -> float:
     """Rotate all frames so the skeleton faces straight forward (+X shoulder vector).
@@ -95,45 +91,6 @@ def apply_facing_correction(frames_out: list) -> float:
             fr["joints"][name] = _rot_y(fr["joints"][name], cos_c, sin_c)
 
     return math.degrees(correction)
-
-
-def apply_shoulder_level(frames_out: list) -> float:
-    """Rotate all frames around Z (roll) to level the shoulders.
-
-    When filmed at an angle, MediaPipe's depth estimate creates a small
-    systematic Y difference between the two shoulders. This measures the
-    average shoulder tilt and rolls the whole skeleton to cancel it.
-
-    In our coordinate system left_shoulder.x < right_shoulder.x (the
-    x axis is flipped from camera-right to subject-right), so the shoulder
-    vector (left - right) points toward -X. We negate avg_dx before passing
-    to atan2 so the angle is measured relative to -X, giving a small
-    deviation angle rather than one near ±180°.
-
-    Returns the correction angle in degrees.
-    """
-    avg_dy = sum(
-        fr["joints"]["left_shoulder"][1] - fr["joints"]["right_shoulder"][1]
-        for fr in frames_out
-    ) / len(frames_out)
-    avg_dx = sum(
-        fr["joints"]["left_shoulder"][0] - fr["joints"]["right_shoulder"][0]
-        for fr in frames_out
-    ) / len(frames_out)
-
-    # Negate avg_dx: left.x - right.x is negative in our coord (left is at -x).
-    # atan2(dy, -avg_dx) measures tilt relative to the expected -X shoulder direction.
-    # correction = tilt (not -tilt) because positive roll lowers left shoulder (at -x).
-    tilt = math.atan2(avg_dy, -avg_dx)
-    correction = tilt
-    cos_c = math.cos(correction)
-    sin_c = math.sin(correction)
-
-    for fr in frames_out:
-        for name in fr["joints"]:
-            fr["joints"][name] = _rot_z(fr["joints"][name], cos_c, sin_c)
-
-    return math.degrees(tilt)
 
 
 def find_model() -> str:
@@ -213,14 +170,7 @@ def extract(video_path: str, output_path: str) -> None:
         print("ERROR: no frames extracted — check that a full-body pose is visible throughout the video.")
         sys.exit(1)
 
-    # 1. Face the skeleton forward (Y rotation — corrects 3/4 filming angle in XZ).
-    rotation_deg = apply_facing_correction(frames_out)
-
-    # 2. Level the shoulders (Z roll — corrects MediaPipe depth bias in Y).
-    shoulder_tilt_deg = apply_shoulder_level(frames_out)
-
-    # 3. Ground last, after rotations, so the lowest ankle is at y=0.05 regardless
-    #    of how the roll correction shifted joint positions.
+    # Ground the skeleton: shift all y values so the lowest ankle sits at y=0.05.
     min_ankle_y = min(
         min(fr["joints"]["left_ankle"][1], fr["joints"]["right_ankle"][1])
         for fr in frames_out
@@ -229,6 +179,9 @@ def extract(video_path: str, output_path: str) -> None:
     for fr in frames_out:
         for name in fr["joints"]:
             fr["joints"][name][1] = round(fr["joints"][name][1] + y_offset, 4)
+
+    # Rotate all frames so the skeleton faces forward in Unity's coordinate space.
+    rotation_deg = apply_facing_correction(frames_out)
 
     clip = {"fps": TARGET_FPS, "frames": frames_out}
     with open(output_path, "w") as f:
@@ -243,7 +196,6 @@ def extract(video_path: str, output_path: str) -> None:
     print(f"\nExtracted {len(frames_out)} frames  ({missed} missed)  ->  {output_path}")
     print(f"  y offset applied:   {y_offset:+.3f}m  (grounded ankles to y=0.05)")
     print(f"  facing correction:  {rotation_deg:+.1f} deg around Y  (aligned shoulders to +X)")
-    print(f"  shoulder level:     {shoulder_tilt_deg:+.1f} deg roll corrected  (levelled shoulders)")
     print(f"  Nose y range:  {min(nose_ys):.3f} to {max(nose_ys):.3f}  (expect ~1.4-1.8 for upright stance)")
     print(f"  Ankle y range: {min(ankle_ys):.3f} to {max(ankle_ys):.3f}  (expect ~0.05 standing, higher during kick)")
     if max(nose_ys) < 0.8:
