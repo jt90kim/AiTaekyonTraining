@@ -546,22 +546,22 @@ MonoBehaviour:
     blendOut: 0.4
   - moveType: splint_low
     fromStance: left_forward
-    clip: {fileID: 0}
+    clip: {fileID: 4900000, guid: 63e4e50215934eb18f0b95d30709b38a, type: 3}
     blendIn: 0.1
     blendOut: 0.4
   - moveType: splint_low
     fromStance: left_forward
-    clip: {fileID: 0}
+    clip: {fileID: 4900000, guid: 5364c295fc154c72b460669313dcf3f1, type: 3}
     blendIn: 0.1
     blendOut: 0.4
   - moveType: splint_low
     fromStance: right_forward
-    clip: {fileID: 0}
+    clip: {fileID: 4900000, guid: ebb2bfc81b664c82a93be5c3809a291f, type: 3}
     blendIn: 0.1
     blendOut: 0.4
   - moveType: splint_low
     fromStance: right_forward
-    clip: {fileID: 0}
+    clip: {fileID: 4900000, guid: 47fa07f47e0e48bab797489948f28b2f, type: 3}
     blendIn: 0.1
     blendOut: 0.4
   - moveType: shin_low
