@@ -12,7 +12,7 @@ public static class TaekyonSceneSetup
 
         AddIfMissing<MotionPlayer>(go);
         AddIfMissing<SkeletonMapper>(go);
-        AddIfMissing<DebugSkeletonRenderer>(go);
+        AddIfMissing<MannequinRenderer>(go);
         var timeCtrl = AddIfMissing<MotionTimeController>(go);
 
         // ── Wire sample clip ─────────────────────────────────────────────────
