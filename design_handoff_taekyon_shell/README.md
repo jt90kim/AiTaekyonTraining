@@ -157,7 +157,7 @@ Three top-level destinations. Use `androidx.activity.compose.setContent { … }`
 
 **Footer hint card** under the technique list: dashed 1dp `line` border, 12dp radius, padding 12dp 14dp. Geist Mono 10sp / mute2 / line-height 1.5. Prefixed by a `◆` glyph in `accent`. Copy:
 
-> "New variants unlock as motion clips are captured. Current build: 1 ready · 5 planned."
+> "New variants unlock as motion clips are captured. Current build: 3 ready · 5 planned."
 
 **Start CTA:** full-width 60dp pill, `accent` bg, `accentInk` text. Label `Start · 1:00` (dynamic, shows current selected duration). If `enabledMoves.isEmpty()` → disabled state: `surface2` bg, `mute2` text, label "Pick at least one variant".
 
@@ -227,6 +227,7 @@ Catalog content:
 | Family | Hangul | Romaja | Description | Status | Heights |
 |---|---|---|---|---|---|
 | Roundhouse | 후려차기 / 돌려차기 | Huryeo-chagi / Dollyeo-chagi | Circular sweep with the shin · whole-body rotation | Ready | `roundhouse_low` (4V, Ready), `roundhouse_high` (4V, Soon) |
+| Splint Kick | 내차기 | Nae-chagi | Inward sweeping arc — shin travels across the centerline | Ready | `splint_low` (4V, Ready), `splint_high` / 곁차기 / 높은내차기 (4V, Ready) |
 | Front Kick | 앞차기 | Ap-chagi | Straight thrust off the lead leg | Soon | `front_low` (4V, Soon), `front_high` (4V, Soon) |
 | Side Kick | 옆차기 | Yeop-chagi | Linear push from the hip · long range | Soon | `side_low` (4V, Soon), `side_high` (4V, Soon) |
 

@@ -152,6 +152,18 @@ const TECHNIQUES = [
     ],
   },
   {
+    id: 'splint',
+    name: 'Splint Kick',
+    hangul: '내차기',
+    romaja: 'Nae-chagi',
+    desc: 'Inward sweeping arc — shin travels across the centerline',
+    status: 'ready',
+    heights: [
+      { id: 'splint_low',  label: 'Low',  hangul: '내차기',              variants: 4, status: 'ready' },
+      { id: 'splint_high', label: 'High', hangul: '곁차기 / 높은내차기', variants: 4, status: 'ready' },
+    ],
+  },
+  {
     id: 'front',
     name: 'Front Kick',
     hangul: '앞차기',

@@ -7,6 +7,7 @@ data class HeightVariant(
     val label: String,
     val variants: Int,
     val status: Status,
+    val hangul: String? = null,
 )
 
 data class TechniqueFamily(
@@ -33,12 +34,13 @@ object MotionLibrary {
             ),
         ),
         TechniqueFamily(
-            id = "split", name = "Splint Kick",
+            id = "splint", name = "Splint Kick",
             hangul = "내차기", romaja = "Nae-chagi",
             desc = "Inward sweeping arc — shin travels across the centerline",
-            status = Status.Soon,
+            status = Status.Ready,
             heights = listOf(
-                HeightVariant("split_low", "Low", 4, Status.Soon),
+                HeightVariant("splint_low",  "Low",  4, Status.Ready),
+                HeightVariant("splint_high", "High", 4, Status.Ready, hangul = "곁차기 / 높은내차기"),
             ),
         ),
     )
