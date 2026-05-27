@@ -32,7 +32,7 @@ public class MannequinRenderer : MonoBehaviour
         var mr  = go.AddComponent<MeshRenderer>();
         var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         mat.color = bodyColor;
-        mat.SetFloat("_Smoothness", 0.1f);
+        mat.SetFloat("_Smoothness", 0f);
         mat.SetFloat("_Metallic",   0f);
         mr.sharedMaterial = mat;
 

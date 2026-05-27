@@ -59,6 +59,19 @@ def _rot_y(pos: list, cos_a: float, sin_a: float) -> list:
 
 
 
+def level_shoulders(frames_out: list) -> None:
+    """Average the Y of left/right shoulder so camera-angle distortion doesn't tilt one side up.
+
+    Only touches [1] (Y) of the two shoulder joints. All other joints and axes are untouched.
+    """
+    for fr in frames_out:
+        ls = fr["joints"]["left_shoulder"]
+        rs = fr["joints"]["right_shoulder"]
+        avg_y = round((ls[1] + rs[1]) / 2, 4)
+        ls[1] = avg_y
+        rs[1] = avg_y
+
+
 def apply_facing_correction(frames_out: list) -> float:
     """Rotate all frames so the skeleton faces straight forward (+X shoulder vector).
 
@@ -182,6 +195,10 @@ def extract(video_path: str, output_path: str) -> None:
 
     # Rotate all frames so the skeleton faces forward in Unity's coordinate space.
     rotation_deg = apply_facing_correction(frames_out)
+
+    # Level shoulders: camera angle causes one shoulder's Y to be estimated higher.
+    # Only the Y of left_shoulder and right_shoulder are modified.
+    level_shoulders(frames_out)
 
     clip = {"fps": TARGET_FPS, "frames": frames_out}
     with open(output_path, "w") as f:
