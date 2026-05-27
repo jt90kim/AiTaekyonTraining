@@ -426,14 +426,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 544687601}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 768a04f5547755546af4bd4d3bb13cac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DebugSkeletonRenderer
-  mapper: {fileID: 0}
-  boneRadius: 0.04
-  headRadius: 0.08
-  jointMaterialTemplate: {fileID: 2100000, guid: fa1e2d3c4b5a697800b9c0d1e2f30001, type: 2}
-  boneMaterialTemplate: {fileID: 2100000, guid: fb1e2d3c4b5a697800b9c0d1e2f30002, type: 2}
+  m_Script: {fileID: 11500000, guid: d9cf24bbd1384c039b54809d431b47df, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MannequinRenderer
+  bodyColor: {r: 0.72, g: 0.70, b: 0.68, a: 1}
 --- !u!114 &544687604
 MonoBehaviour:
   m_ObjectHideFlags: 0
