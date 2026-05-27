@@ -70,19 +70,22 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | Setting | Value |
 |---|---|
 | Camera | Perspective, FOV 50, position (0, 1.5, -3), 5° downward tilt |
-| Skeleton root Y rotation | ~190° (faces camera) |
+| Skeleton root Y rotation | 270° (faces camera — natural facing is -X after facing correction; 270° maps -X → -Z toward camera) |
 | Move probability | 95% |
 | Idle duration | 0 (no pause between actions) |
 | Transition speed | 3× |
 | Move (kick) speed | 4× |
 
-### Visual system (DebugSkeletonRenderer.cs)
+### Visual system (MannequinRenderer.cs)
 
-- **Arms:** orange cylinders
-- **Left leg:** blue cylinders
-- **Right leg:** red cylinders
-- **Torso:** gray cylinders
-- **Head:** yellow sphere
+Single procedural flat-shaded mesh rebuilt each frame from joint world positions.
+
+- **Body:** warm neutral gray `(0.76, 0.74, 0.72)`, URP/Lit, smoothness=0 (fully matte)
+- **Torso:** 4-level elliptical mesh (pelvis → waist → chest → clavicle, 10-sided, depth ratio 0.52)
+- **Neck:** short frustum, shoulder midpoint → head base
+- **Head:** featureless sphere r=0.095
+- **Arms:** 8-sided tapered frustums (shoulder 0.050 → wrist 0.025); hand cone stub
+- **Legs:** 9-sided tapered frustums (hip 0.062 → ankle 0.030); flat foot slab
 - **Floor:** 8×8 black/white checkerboard plane (4m×4m) at y=0, visible in perspective
 
 ### All 11 motion clips
