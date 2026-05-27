@@ -24,7 +24,7 @@ object MotionLibrary {
     val techniques: List<TechniqueFamily> = listOf(
         TechniqueFamily(
             id = "roundhouse", name = "Roundhouse",
-            hangul = "돌려차기", romaja = "Dollyeo-chagi",
+            hangul = "후려차기 / 돌려차기", romaja = "Huryeo-chagi / Dollyeo-chagi",
             desc = "Circular sweep with the shin · whole-body rotation",
             status = Status.Ready,
             heights = listOf(
