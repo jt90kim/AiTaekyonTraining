@@ -429,6 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9cf24bbd1384c039b54809d431b47df, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::MannequinRenderer
+  _materialTemplate: {fileID: 2100000, guid: f1e2d3c4b5a697886950413223140506, type: 2}
   bodyColor: {r: 0.72, g: 0.70, b: 0.68, a: 1}
 --- !u!114 &544687604
 MonoBehaviour:

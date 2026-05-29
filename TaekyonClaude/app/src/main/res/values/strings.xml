@@ -1,3 +1,47 @@
 <resources>
     <string name="app_name">Taekyon Trainer</string>
+
+    <!-- Technique names -->
+    <string name="technique_roundhouse">Roundhouse</string>
+    <string name="technique_splint">Splint Kick</string>
+
+    <!-- Technique descriptions -->
+    <string name="technique_roundhouse_desc">Circular sweep with the shin · whole-body rotation</string>
+    <string name="technique_splint_desc">Inward sweeping arc — shin travels across the centerline</string>
+
+    <!-- Height labels -->
+    <string name="height_low">Low</string>
+    <string name="height_high">High</string>
+
+    <!-- Splash screen -->
+    <string name="splash_subtitle">Trainer · Korean martial reaction drill</string>
+    <string name="splash_about_label">About</string>
+    <string name="splash_about_body">Watch the opponent. React in real time.\nNo scoring. No pose tracking. Just rhythm.</string>
+    <string name="splash_begin">Begin training</string>
+
+    <!-- Setup screen -->
+    <string name="setup_title">Session setup</string>
+    <string name="duration_label">Duration</string>
+    <string name="duration_range">30s – 5m</string>
+    <string name="stepper_minus">–15s</string>
+    <string name="stepper_plus">+15s</string>
+    <string name="techniques_label">Techniques</string>
+    <string name="techniques_selected">%d selected</string>
+    <string name="technique_soon_badge">soon</string>
+    <string name="techniques_note">New variants unlock as motion clips are captured. Current build: %1$d ready · %2$d planned.</string>
+    <string name="start_button">Start · %s</string>
+    <string name="start_pick_variant">Pick at least one variant</string>
+
+    <!-- Training overlay -->
+    <string name="training_status_time_up">Time up</string>
+    <string name="training_status_active">Active</string>
+    <string name="training_status_loading">Loading…</string>
+    <string name="training_preparing">Preparing opponent…</string>
+    <string name="training_kicks_label">kicks</string>
+    <string name="training_duration_stat">DURATION</string>
+    <string name="training_kicks_stat">KICKS</string>
+    <string name="training_technique_stat">TECHNIQUE</string>
+    <string name="complete_title">Good job</string>
+    <string name="complete_subtitle">session complete</string>
+    <string name="complete_done">Done</string>
 </resources>

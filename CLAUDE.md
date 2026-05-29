@@ -60,10 +60,11 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 5 — Polish | Timing, anticipation, flow refinement | ✅ Done |
 | 6 — Real Kicks | Capture kick clips via MediaPipe; wire into data-driven state machine | ✅ Done |
 | 7 — Visual Polish | Capsule renderer, color coding, floor grid, perspective camera | ✅ Done |
+| 8 — Android App Polish | Session complete card, dark/light theme, i18n (KO), app icon, splash delay | ✅ Done |
 
 ## Current Status
 
-**All milestones complete.** The opponent runs autonomously, performs kicks continuously, and the scene renders cleanly with color-coded limbs and a perspective floor grid for depth reference.
+**All milestones complete.** The opponent runs autonomously, performs kicks continuously, and the scene renders cleanly. The Android shell is fully polished: themed UI, Korean localisation, session report card, and a custom app icon.
 
 ### Scene configuration (SampleScene.unity)
 
@@ -128,10 +129,21 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 | `onUnitySceneReady()` callback | ✅ Wired — Unity calls Android when scene loads; Android starts timer after this |
 | `SetEnabledMoves(csv)` bridge | ✅ Wired — Android sends CSV of enabled move type IDs; Unity state machine filters variants |
 | Move ID alignment | ✅ Confirmed — Android uses `roundhouse_low`, all 4 Unity `MoveVariant.moveType` fields are `roundhouse_low` |
-| `roundhouse_high` / `split_kick_low` in Android catalog | ⚠️ Listed in `MotionLibrary.kt` but no Unity variants exist — silently fire nothing if selected |
+| `roundhouse_high` in Android catalog | ✅ 4 variants captured and wired in scene; marked Ready in MotionLibrary.kt |
 | `ReceiveMotionMessage` (direct JSON path) | 🗄️ Wired but unused — superseded by state machine |
+| Android mannequin shader | ✅ Fixed — `MannequinMat.mat` asset forces URP Lit shader into build; wired via `_materialTemplate` |
 
-**Next:** End-to-end Android build + device test. Verify timer, SetEnabledMoves filtering, and back-button flow on device.
+### Android UI (Milestone 8)
+
+| Feature | Detail |
+|---|---|
+| **Session complete card** | Fades in when timer hits 0. Shows DURATION + KICKS stats, technique list, Done button → back to launcher |
+| **Dark / light theme** | `TaekyonColors` CompositionLocal; `isSystemInDarkTheme()` selects dark/light palette automatically |
+| **Internationalisation** | `res/values/strings.xml` (English) + `res/values-ko/strings.xml` (Korean). `MotionLibrary` uses `@StringRes` IDs; all composables use `stringResource()` |
+| **App icon** | Custom adaptive vector icon: amber kicking figure on dark brown `#100C08` background. Monochrome layer for Android 13+ themed icons |
+| **Splash screen delay** | `SPLASH_DELAY_MS = 1500L` in `LauncherActivity.kt` — "Begin training" button fades in after this delay. Use a plain `val` (not `const val`) so hot-swap picks up changes |
+
+**Next:** End-to-end device test. Verify session complete card, Korean locale strings, and icon appearance on device.
 
 ## Non-Goals
 

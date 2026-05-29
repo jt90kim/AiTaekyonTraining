@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(SkeletonMapper))]
 public class MannequinRenderer : MonoBehaviour
 {
+    [SerializeField] private Material _materialTemplate;  // assign URP/Lit mat asset — keeps shader in build
     [SerializeField] private Color bodyColor = new Color(0.76f, 0.74f, 0.72f, 1f);
 
     private SkeletonMapper _mapper;
@@ -25,7 +26,10 @@ public class MannequinRenderer : MonoBehaviour
         go.AddComponent<MeshFilter>().sharedMesh = _mesh;
 
         var mr  = go.AddComponent<MeshRenderer>();
-        var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        var baseMat = _materialTemplate != null
+            ? _materialTemplate
+            : new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        var mat = new Material(baseMat);
         mat.color = bodyColor;
         mat.SetFloat("_Smoothness", 0f);
         mat.SetFloat("_Metallic",   0f);

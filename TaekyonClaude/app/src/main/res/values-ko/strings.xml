@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">태껸 트레이너</string>
+
+    <!-- Technique names -->
+    <string name="technique_roundhouse">후려차기</string>
+    <string name="technique_splint">내차기</string>
+
+    <!-- Technique descriptions -->
+    <string name="technique_roundhouse_desc">정강이로 원을 그리며 쓸어차기 · 전신 회전</string>
+    <string name="technique_splint_desc">안쪽으로 쓸어올리는 동작 — 정강이가 중심선을 가로지름</string>
+
+    <!-- Height labels -->
+    <string name="height_low">낮은</string>
+    <string name="height_high">높은</string>
+
+    <!-- Splash screen -->
+    <string name="splash_subtitle">한국 무술 반응 훈련</string>
+    <string name="splash_about_label">소개</string>
+    <string name="splash_about_body">상대방을 보세요. 실시간으로 반응하세요.\n점수 없음. 자세 추적 없음. 오직 리듬.</string>
+    <string name="splash_begin">훈련 시작</string>
+
+    <!-- Setup screen -->
+    <string name="setup_title">세션 설정</string>
+    <string name="duration_label">시간</string>
+    <string name="duration_range">30초 – 5분</string>
+    <string name="stepper_minus">–15초</string>
+    <string name="stepper_plus">+15초</string>
+    <string name="techniques_label">기술</string>
+    <string name="techniques_selected">%d개 선택됨</string>
+    <string name="technique_soon_badge">준비 중</string>
+    <string name="techniques_note">동작 클립이 추가되면 새 변형이 열립니다. 현재 빌드: %1$d개 준비됨 · %2$d개 예정됨.</string>
+    <string name="start_button">시작 · %s</string>
+    <string name="start_pick_variant">하나 이상의 변형을 선택하세요</string>
+
+    <!-- Training overlay -->
+    <string name="training_status_time_up">시간 초과</string>
+    <string name="training_status_active">진행 중</string>
+    <string name="training_status_loading">로딩 중…</string>
+    <string name="training_preparing">상대방 준비 중…</string>
+    <string name="training_kicks_label">차기</string>
+    <string name="training_duration_stat">시간</string>
+    <string name="training_kicks_stat">차기 수</string>
+    <string name="training_technique_stat">기술</string>
+    <string name="complete_title">수고했어요</string>
+    <string name="complete_subtitle">세션 완료</string>
+    <string name="complete_done">확인</string>
+</resources>

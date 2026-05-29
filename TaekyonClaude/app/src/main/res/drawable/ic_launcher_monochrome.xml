@@ -1,77 +1,58 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="432"
     android:viewportHeight="432">
 
-    <!-- Leap arc (behind figure) — gradient fade from takeoff to foot -->
+    <!-- Single-colour silhouette for Android 13+ themed icons. The system
+         recolours this layer; only the shape (alpha) matters. -->
+
+    <!-- Leap arc (translucent so the trail still reads when tinted) -->
     <path
         android:pathData="M96,388 Q150,320 214,250 Q290,200 340,142"
+        android:strokeColor="#59000000"
         android:strokeWidth="22"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:fillColor="#00000000">
-        <aapt:attr name="android:strokeColor">
-            <gradient
-                android:startX="96" android:startY="388"
-                android:endX="340" android:endY="142"
-                android:type="linear">
-                <item android:offset="0.0" android:color="#00FFAA2B"/>
-                <item android:offset="0.55" android:color="#47FFAA2B"/>
-                <item android:offset="1.0" android:color="#B3FFAA2B"/>
-            </gradient>
-        </aapt:attr>
-    </path>
+        android:fillColor="#00000000"/>
 
-    <!-- Trailing arm — flares back for balance (dim amber) -->
     <path
         android:pathData="M190,182 L150,206 L114,196"
-        android:strokeColor="#E8881F"
+        android:strokeColor="#FF000000"
         android:strokeWidth="20"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"/>
-
-    <!-- Lead arm — reaches toward the kick (dim amber) -->
     <path
         android:pathData="M198,180 L248,178 L292,162"
-        android:strokeColor="#E8881F"
+        android:strokeColor="#FF000000"
         android:strokeWidth="20"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"/>
-
-    <!-- Trailing (tucked) leg -->
     <path
         android:pathData="M214,250 L184,322 L250,344"
-        android:strokeColor="#FFAA2B"
+        android:strokeColor="#FF000000"
         android:strokeWidth="42"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"/>
-
-    <!-- Kicking leg — hero element -->
     <path
         android:pathData="M214,250 L276,192 L342,140"
-        android:strokeColor="#FFAA2B"
+        android:strokeColor="#FF000000"
         android:strokeWidth="46"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"/>
-
-    <!-- Torso -->
     <path
         android:pathData="M184,170 L214,250"
-        android:strokeColor="#FFAA2B"
+        android:strokeColor="#FF000000"
         android:strokeWidth="44"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
         android:fillColor="#00000000"/>
-
-    <!-- Head -->
     <path
         android:pathData="M137,138 a29,29 0 1,0 58,0 a29,29 0 1,0 -58,0 Z"
-        android:fillColor="#FFAA2B"/>
+        android:fillColor="#FF000000"/>
 
 </vector>
