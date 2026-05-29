@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Taekyon Trainer</string>
+    <string name="app_name">Taekyun Trainer</string>
 
     <!-- Technique names -->
     <string name="technique_roundhouse">Roundhouse</string>

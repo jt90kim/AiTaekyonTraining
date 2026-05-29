@@ -1,8 +1,8 @@
-# CLAUDE.md — Taekyon Training App (Root)
+# CLAUDE.md — Taekyun Training App (Root)
 
 ## Project Goal
 
-Unity 6 application where an AI opponent performs pre-authored Taekyon (결련택견) motions.
+Unity 6 application where an AI opponent performs pre-authored Taekyun (결련택견) motions.
 The user observes and reacts. No real-time user detection or pose tracking.
 
 ## Workspace Structure
