@@ -2,12 +2,11 @@ package com.jtk.android.taekyonclaude
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Canvas
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,39 +38,49 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import com.jtk.android.taekyonclaude.ui.theme.*
-import kotlinx.coroutines.delay
+
+private val SPLASH_DURATION_MS = 1500L
 
 class LauncherActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val startTime = SystemClock.elapsedRealtime()
+        splashScreen.setKeepOnScreenCondition {
+            SystemClock.elapsedRealtime() - startTime < SPLASH_DURATION_MS
+        }
+        splashScreen.setOnExitAnimationListener { provider ->
+            provider.view.animate()
+                .alpha(0f)
+                .setDuration(600L)
+                .withEndAction { provider.remove() }
+                .start()
+        }
+
         setContent {
             TaekyonClaudeTheme {
-                var showSetup by rememberSaveable { mutableStateOf(false) }
                 var seconds by rememberSaveable { mutableIntStateOf(60) }
                 var enabledMovesList by rememberSaveable { mutableStateOf(listOf("roundhouse_low")) }
                 val enabledMoves = enabledMovesList.toSet()
 
-                if (showSetup) {
-                    SetupScreen(
-                        seconds = seconds,
-                        enabledMoves = enabledMoves,
-                        onSecondsChange = { seconds = it },
-                        onMovesChange = { enabledMovesList = it.toList() },
-                        onBack = { showSetup = false },
-                        onStart = {
-                            startActivity(
-                                Intent(this, MainActivity::class.java).apply {
-                                    putExtra("durationSeconds", seconds)
-                                    putExtra("enabledMoves", enabledMoves.joinToString(","))
-                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                                }
-                            )
-                        },
-                    )
-                } else {
-                    SplashScreen(onContinue = { showSetup = true })
-                }
+                SetupScreen(
+                    seconds = seconds,
+                    enabledMoves = enabledMoves,
+                    onSecondsChange = { seconds = it },
+                    onMovesChange = { enabledMovesList = it.toList() },
+                    onBack = { },
+                    onStart = {
+                        startActivity(
+                            Intent(this, MainActivity::class.java).apply {
+                                putExtra("durationSeconds", seconds)
+                                putExtra("enabledMoves", enabledMoves.joinToString(","))
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            }
+                        )
+                    },
+                )
             }
         }
     }
@@ -102,119 +111,6 @@ private fun MonoLabel(text: String, color: Color? = null, size: Int = 10) {
         color = color ?: c.mute,
         letterSpacing = 0.06.em,
     )
-}
-
-// ─── Splash ─────────────────────────────────────────────────────────────────
-
-private val SPLASH_DELAY_MS = 1500L
-
-@Composable
-private fun SplashScreen(onContinue: () -> Unit) {
-    val c = LocalTaekyonColors.current
-    var ctaVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(SPLASH_DELAY_MS)
-        ctaVisible = true
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(c.bg)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(horizontal = 22.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            MonoLabel("B · EMBERS")
-            MonoLabel("v0.4.1")
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .padding(horizontal = 28.dp),
-        ) {
-            Text(
-                "결련택견",
-                fontFamily = NotoSansKRFamily,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Medium,
-                color = c.accent,
-                letterSpacing = 0.04.em,
-            )
-            Spacer(Modifier.height(14.dp))
-            Text(
-                "TAEKYON",
-                fontFamily = SpaceGroteskFamily,
-                fontSize = 64.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = c.fg,
-                letterSpacing = (-0.04).em,
-                lineHeight = (64 * 0.92).sp,
-            )
-            Spacer(Modifier.height(16.dp))
-            Box(Modifier.width(48.dp).height(2.dp).background(c.accent))
-            Spacer(Modifier.height(14.dp))
-            Text(
-                stringResource(R.string.splash_subtitle),
-                fontFamily = SpaceGroteskFamily,
-                fontSize = 17.sp,
-                color = c.mute,
-            )
-            Spacer(Modifier.height(40.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(c.surface)
-                    .border(1.dp, c.line, RoundedCornerShape(18.dp))
-                    .padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 16.dp)
-            ) {
-                Column {
-                    MonoLabel(stringResource(R.string.splash_about_label), size = 10)
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        stringResource(R.string.splash_about_body),
-                        fontFamily = SpaceGroteskFamily,
-                        fontSize = 13.sp,
-                        color = c.mute,
-                        lineHeight = (13 * 1.55).sp,
-                    )
-                }
-            }
-        }
-
-        AnimatedVisibility(
-            visible = ctaVisible,
-            enter = fadeIn(animationSpec = tween(400)),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(horizontal = 22.dp, vertical = 30.dp),
-        ) {
-            Button(
-                onClick = onContinue,
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(containerColor = c.accent, contentColor = c.accentInk),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
-            ) {
-                Text(
-                    stringResource(R.string.splash_begin),
-                    fontFamily = SpaceGroteskFamily,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.01.em,
-                )
-            }
-        }
-    }
 }
 
 // ─── Setup ──────────────────────────────────────────────────────────────────

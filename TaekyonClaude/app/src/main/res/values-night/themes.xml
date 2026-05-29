@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- Dark-mode splash: deep brown bg, amber figure shows directly -->
+    <style name="Theme.TaekyonClaude.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#100C08</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.TaekyonClaude</item>
+    </style>
+
+</resources>
