@@ -14,7 +14,7 @@
     <string name="height_high">High</string>
 
     <!-- Splash screen -->
-    <string name="splash_subtitle">Trainer · Korean martial reaction drill</string>
+    <string name="splash_subtitle">Taekyun reaction drill</string>
     <string name="splash_about_label">About</string>
     <string name="splash_about_body">Watch the opponent. React in real time.\nNo scoring. No pose tracking. Just rhythm.</string>
     <string name="splash_begin">Begin training</string>
