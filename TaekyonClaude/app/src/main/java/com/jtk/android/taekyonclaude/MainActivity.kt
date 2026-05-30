@@ -43,6 +43,8 @@ import kotlinx.coroutines.delay
 class MainActivity : UnityPlayerGameActivity() {
 
     private val _unityReady = mutableStateOf(false)
+    private val _isPaused = mutableStateOf(false)
+    private val _showExitDialog = mutableStateOf(false)
     private val _durationSeconds = mutableIntStateOf(180)
     private val _sessionKey = mutableIntStateOf(0)
     private var _enabledMovesCsv = "roundhouse_low"
@@ -77,6 +79,8 @@ class MainActivity : UnityPlayerGameActivity() {
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
         _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
         _sessionKey.intValue++
+        _isPaused.value = false
+        _showExitDialog.value = false
         runOnUiThread {
             _unityReady.value = true
             sendEnabledMoves()
@@ -98,17 +102,32 @@ class MainActivity : UnityPlayerGameActivity() {
         }
     }
 
+    private fun sendPaused(paused: Boolean) {
+        try {
+            UnityPlayer.UnitySendMessage("AndroidBridge", "SetPaused", if (paused) "true" else "false")
+        } catch (e: Exception) {
+            android.util.Log.w("MainActivity", "SetPaused failed: ${e.message}")
+        }
+    }
+
     private fun navigateBack() {
         startActivity(
             Intent(this, LauncherActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         )
+        moveTaskToBack(true)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            navigateBack()
+            if (_unityReady.value && !_showExitDialog.value) {
+                _isPaused.value = true
+                sendPaused(true)
+                _showExitDialog.value = true
+            } else if (!_unityReady.value) {
+                navigateBack()
+            }
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -135,21 +154,32 @@ class MainActivity : UnityPlayerGameActivity() {
         val c = LocalTaekyonColors.current
         var remainingSeconds by remember { mutableIntStateOf(durationSeconds) }
         var kickCount by remember { mutableIntStateOf(0) }
+        val isPaused = _isPaused.value
+        val showExitDialog = _showExitDialog.value
         val overTime = remainingSeconds <= 0
 
-        LaunchedEffect(unityReady) {
-            if (!unityReady) return@LaunchedEffect
+        LaunchedEffect(unityReady, isPaused) {
+            if (!unityReady || isPaused) return@LaunchedEffect
             while (remainingSeconds > 0) {
                 delay(1000L)
                 remainingSeconds--
             }
         }
 
-        LaunchedEffect(unityReady, overTime) {
-            if (!unityReady || overTime) return@LaunchedEffect
+        LaunchedEffect(unityReady, overTime, isPaused) {
+            if (!unityReady || overTime || isPaused) return@LaunchedEffect
             while (true) {
                 delay(1800L)
                 kickCount++
+            }
+        }
+
+        // Auto-unpause when session ends so the mannequin keeps running under the card
+        LaunchedEffect(overTime) {
+            if (overTime && _isPaused.value) {
+                _isPaused.value = false
+                _showExitDialog.value = false
+                sendPaused(false)
             }
         }
 
@@ -290,6 +320,143 @@ class MainActivity : UnityPlayerGameActivity() {
                             color = c.mute,
                             letterSpacing = 0.18.em,
                         )
+                    }
+                }
+            }
+
+            // Pause / resume pill — bottom center, amber for visibility over checkerboard
+            if (unityReady && !overTime) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(bottom = 28.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(c.accent)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                        ) {
+                            _isPaused.value = !_isPaused.value
+                            sendPaused(_isPaused.value)
+                        }
+                        .padding(horizontal = 28.dp, vertical = 14.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Canvas(Modifier.size(16.dp)) {
+                            if (isPaused) {
+                                val path = androidx.compose.ui.graphics.Path().apply {
+                                    moveTo(size.width * 0.28f, size.height * 0.18f)
+                                    lineTo(size.width * 0.28f, size.height * 0.82f)
+                                    lineTo(size.width * 0.82f, size.height * 0.50f)
+                                    close()
+                                }
+                                drawPath(path, color = c.accentInk)
+                            } else {
+                                val barW = size.width * 0.28f
+                                val barH = size.height * 0.70f
+                                val top  = (size.height - barH) / 2f
+                                drawRect(c.accentInk, topLeft = Offset(size.width * 0.18f, top), size = androidx.compose.ui.geometry.Size(barW, barH))
+                                drawRect(c.accentInk, topLeft = Offset(size.width * 0.54f, top), size = androidx.compose.ui.geometry.Size(barW, barH))
+                            }
+                        }
+                        Text(
+                            if (isPaused) stringResource(R.string.training_resume)
+                            else stringResource(R.string.training_pause),
+                            fontFamily = GeistMonoFamily,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = c.accentInk,
+                            letterSpacing = 0.06.em,
+                        )
+                    }
+                }
+            }
+
+            // Exit confirmation dialog
+            AnimatedVisibility(visible = showExitDialog, enter = fadeIn(), exit = fadeOut()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(c.bg.copy(alpha = 0.75f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 32.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(c.surface)
+                            .border(1.dp, c.line, RoundedCornerShape(20.dp))
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        Text(
+                            stringResource(R.string.training_exit_title),
+                            fontFamily = SpaceGroteskFamily,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = c.fg,
+                            letterSpacing = (-0.01).em,
+                        )
+                        Text(
+                            stringResource(R.string.training_exit_body),
+                            fontFamily = GeistMonoFamily,
+                            fontSize = 13.sp,
+                            color = c.mute,
+                            letterSpacing = 0.02.em,
+                        )
+                        // Keep training (primary)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .clip(CircleShape)
+                                .background(c.accent)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ) {
+                                    _showExitDialog.value = false
+                                    _isPaused.value = false
+                                    sendPaused(false)
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                stringResource(R.string.training_exit_keep),
+                                fontFamily = GeistMonoFamily,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = c.accentInk,
+                                letterSpacing = 0.05.em,
+                            )
+                        }
+                        // End session (secondary)
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                                .clip(CircleShape)
+                                .border(1.dp, c.line, CircleShape)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ) { navigateBack() },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                stringResource(R.string.training_exit_end),
+                                fontFamily = GeistMonoFamily,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = c.fg,
+                                letterSpacing = 0.05.em,
+                            )
+                        }
                     }
                 }
             }

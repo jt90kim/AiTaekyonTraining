@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">태껸 트레이너</string>
+    <string name="app_name">택견 트레이너</string>
 
     <!-- Technique names -->
     <string name="technique_roundhouse">후려차기</string>
@@ -28,9 +28,9 @@
     <string name="techniques_label">기술</string>
     <string name="techniques_selected">%d개 선택됨</string>
     <string name="technique_soon_badge">준비 중</string>
-    <string name="techniques_note">동작 클립이 추가되면 새 변형이 열립니다. 현재 빌드: %1$d개 준비됨 · %2$d개 예정됨.</string>
+    <string name="techniques_note">동작 클립이 추가되면 새 변형이 열립니다. 현재 빌드: %1$d개 준비됨.</string>
     <string name="start_button">시작 · %s</string>
-    <string name="start_pick_variant">하나 이상의 변형을 선택하세요</string>
+    <string name="start_pick_variant">한개 이상의 기술을 선택하세요</string>
 
     <!-- Training overlay -->
     <string name="training_status_time_up">시간 초과</string>
@@ -41,6 +41,12 @@
     <string name="training_duration_stat">시간</string>
     <string name="training_kicks_stat">발차기 갯수</string>
     <string name="training_technique_stat">기술</string>
+    <string name="training_pause">일시정지</string>
+    <string name="training_resume">계속하기</string>
+    <string name="training_exit_title">훈련 종료?</string>
+    <string name="training_exit_body">세션이 아직 끝나지 않았어요.</string>
+    <string name="training_exit_keep">계속 훈련하기</string>
+    <string name="training_exit_end">종료</string>
     <string name="complete_title">수고했어요</string>
     <string name="complete_subtitle">세션 완료</string>
     <string name="complete_done">확인</string>

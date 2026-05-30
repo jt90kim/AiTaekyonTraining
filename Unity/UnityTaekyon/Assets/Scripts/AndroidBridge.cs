@@ -29,6 +29,14 @@ public class AndroidBridge : MonoBehaviour
 #endif
     }
 
+    // Called by Android: UnitySendMessage("AndroidBridge", "SetPaused", "true"|"false")
+    public void SetPaused(string value)
+    {
+        bool paused = value.Trim().ToLower() == "true";
+        Time.timeScale = paused ? 0f : 1f;
+        Debug.Log($"AndroidBridge: SetPaused {paused}");
+    }
+
     // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_kick,split_kick")
     public void SetEnabledMoves(string csv)
     {

@@ -4,12 +4,12 @@
 
 | # | Check | Pass criteria |
 |---|-------|---------------|
-| 1.1 | Install fresh (or clear app data) | No crash on first launch |
-| 1.2 | System splash appears | Amber kicking figure on `#100C08` background |
-| 1.3 | Splash duration | Splash holds for ≥ 1500 ms before transitioning |
-| 1.4 | Splash exit animation | Fades out over ~600 ms; does not snap away |
-| 1.5 | App icon on home screen | Amber figure, correct background; round variant also correct |
-| 1.6 | Android 13+ themed icon | Monochrome silhouette shows when system accent is applied |
+| 1.1 | Install fresh (or clear app data) | No crash on first launch |  done
+| 1.2 | System splash appears | Amber kicking figure on `#100C08` background | done
+| 1.3 | Splash duration | Splash holds for ≥ 1500 ms before transitioning | done
+| 1.4 | Splash exit animation | Fades out over ~600 ms; does not snap away | good enough
+| 1.5 | App icon on home screen | Amber figure, correct background; round variant also correct | yes
+| 1.6 | Android 13+ themed icon | Monochrome silhouette shows when system accent is applied |   works
 
 ---
 
@@ -17,15 +17,15 @@
 
 | # | Check | Pass criteria |
 |---|-------|---------------|
-| 2.1 | Default state | Duration = 1:00 (60 s), `roundhouse_low` chip checked |
-| 2.2 | Duration stepper | –15 s / +15 s increments correctly; floor = 0:15 (15 s), ceiling = 5:00 (300 s) |
-| 2.3 | Preset chips | Tapping 0:30 / 1:00 / 2:00 / 3:00 / 5:00 snaps duration; active chip highlights amber |
-| 2.4 | Start button label | Shows "Start · 1:00" (or current duration) when ≥ 1 variant is selected |
-| 2.5 | Deselect all variants | Start button changes to "Pick at least one variant" and is non-tappable |
-| 2.6 | Re-select after deselecting | Start button re-enables |
-| 2.7 | "Soon" badge | All 4 variants are Ready — confirm no "SOON" chips appear |
-| 2.8 | Technique count note | Shows "8 ready · 0 planned" |
-| 2.9 | Technique card highlight | Card gets amber border + tint when any height chip is on |
+| 2.1 | Default state | Duration = 1:00 (60 s), `roundhouse_low` chip checked |   done
+| 2.2 | Duration stepper | –15 s / +15 s increments correctly; floor = 0:15 (15 s), ceiling = 5:00 (300 s) | done
+| 2.3 | Preset chips | Tapping 0:30 / 1:00 / 2:00 / 3:00 / 5:00 snaps duration; active chip highlights amber |  done
+| 2.4 | Start button label | Shows "Start · 1:00" (or current duration) when ≥ 1 variant is selected | done
+| 2.5 | Deselect all variants | Start button changes to "Pick at least one variant" and is non-tappable | done
+| 2.6 | Re-select after deselecting | Start button re-enables | done
+| 2.7 | "Soon" badge | All 4 variants are Ready — confirm no "SOON" chips appear | done
+| 2.8 | Technique count note | Shows "8 ready · 0 planned" | done
+| 2.9 | Technique card highlight | Card gets amber border + tint when any height chip is on |  done
 
 ---
 

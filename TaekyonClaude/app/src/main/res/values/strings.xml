@@ -28,7 +28,7 @@
     <string name="techniques_label">Techniques</string>
     <string name="techniques_selected">%d selected</string>
     <string name="technique_soon_badge">soon</string>
-    <string name="techniques_note">New variants unlock as motion clips are captured. Current build: %1$d ready · %2$d planned.</string>
+    <string name="techniques_note">New variants unlock as motion clips are captured. Current build: %1$d ready.</string>
     <string name="start_button">Start · %s</string>
     <string name="start_pick_variant">Pick at least one variant</string>
 
@@ -41,6 +41,12 @@
     <string name="training_duration_stat">DURATION</string>
     <string name="training_kicks_stat">KICKS</string>
     <string name="training_technique_stat">TECHNIQUE</string>
+    <string name="training_pause">Pause</string>
+    <string name="training_resume">Resume</string>
+    <string name="training_exit_title">End training?</string>
+    <string name="training_exit_body">Your session isn\'t done yet.</string>
+    <string name="training_exit_keep">Keep training</string>
+    <string name="training_exit_end">End session</string>
     <string name="complete_title">Good job</string>
     <string name="complete_subtitle">session complete</string>
     <string name="complete_done">Done</string>

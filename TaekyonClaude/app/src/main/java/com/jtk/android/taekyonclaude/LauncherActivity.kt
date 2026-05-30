@@ -329,7 +329,6 @@ private fun TechniquesSection(enabledMoves: Set<String>, onMovesChange: (Set<Str
     val c = LocalTaekyonColors.current
     val allHeights = MotionLibrary.techniques.flatMap { it.heights }
     val readyCount = allHeights.count { it.status == Status.Ready }
-    val soonCount  = allHeights.count { it.status == Status.Soon }
 
     Row(
         Modifier.fillMaxWidth(),
@@ -359,7 +358,7 @@ private fun TechniquesSection(enabledMoves: Set<String>, onMovesChange: (Set<Str
     ) {
         Text("◆", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = c.accent)
         Text(
-            stringResource(R.string.techniques_note, readyCount, soonCount),
+            stringResource(R.string.techniques_note, readyCount),
             fontFamily = GeistMonoFamily,
             fontSize = 10.sp,
             color = c.mute2,
