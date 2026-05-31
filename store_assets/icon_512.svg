@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 432 432">
+
+  <defs>
+    <linearGradient id="arcGrad" x1="96" y1="388" x2="340" y2="142" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#FFAA2B" stop-opacity="0"/>
+      <stop offset="55%"  stop-color="#FFAA2B" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFAA2B" stop-opacity="0.70"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="52%" r="55%">
+      <stop offset="0%"   stop-color="#FFAA2B" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#FFAA2B" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="432" height="432" fill="#100C08"/>
+
+  <!-- Subtle glow behind figure -->
+  <rect width="432" height="432" fill="url(#glow)"/>
+
+  <!-- Leap arc (behind figure) -->
+  <path d="M96,388 Q150,320 214,250 Q290,200 340,142"
+        stroke="url(#arcGrad)" stroke-width="22"
+        stroke-linecap="round" fill="none"/>
+
+  <!-- Trailing arm -->
+  <path d="M190,182 L150,206 L114,196"
+        stroke="#E8881F" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Lead arm -->
+  <path d="M198,180 L248,178 L292,162"
+        stroke="#E8881F" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Trailing (tucked) leg -->
+  <path d="M214,250 L184,322 L250,344"
+        stroke="#FFAA2B" stroke-width="42"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Kicking leg — hero element -->
+  <path d="M214,250 L276,192 L342,140"
+        stroke="#FFAA2B" stroke-width="46"
+        stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Torso -->
+  <path d="M184,170 L214,250"
+        stroke="#FFAA2B" stroke-width="44"
+        stroke-linecap="round" fill="none"/>
+
+  <!-- Head -->
+  <circle cx="166" cy="138" r="29" fill="#FFAA2B"/>
+
+</svg>

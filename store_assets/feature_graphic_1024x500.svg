@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+
+  <defs>
+    <!-- Arc gradient for the figure's motion trail -->
+    <linearGradient id="arcGrad"
+        x1="0" y1="0" x2="1" y2="-1"
+        gradientUnits="userSpaceOnUse"
+        gradientTransform="matrix(1,0,0,1,80,380)">
+      <stop offset="0%"   stop-color="#FFAA2B" stop-opacity="0"/>
+      <stop offset="55%"  stop-color="#FFAA2B" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#FFAA2B" stop-opacity="0.65"/>
+    </linearGradient>
+    <!-- Radial glow behind the figure -->
+    <radialGradient id="figureGlow" cx="225" cy="235" r="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0%"   stop-color="#FFAA2B" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#FFAA2B" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Figure group, scaled 1.32× and placed left-center -->
+    <!-- transform centers original figure (cx≈225,cy≈227) at canvas (225,258) -->
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="500" fill="#100C08"/>
+
+  <!-- Subtle horizontal rule texture -->
+  <line x1="0" y1="499" x2="1024" y2="499" stroke="#FFAA2B" stroke-width="1.5" stroke-opacity="0.18"/>
+  <line x1="0" y1="0"   x2="1024" y2="0"   stroke="#FFAA2B" stroke-width="1.5" stroke-opacity="0.18"/>
+
+  <!-- ─── FIGURE (left side) ─────────────────────────────────────────── -->
+  <g transform="translate(225,258) scale(1.32) translate(-225,-227)">
+
+    <!-- Radial glow -->
+    <ellipse cx="225" cy="235" rx="210" ry="210" fill="url(#figureGlow)"/>
+
+    <!-- Leap arc -->
+    <path d="M96,388 Q150,320 214,250 Q290,200 340,142"
+          stroke="url(#arcGrad)" stroke-width="22"
+          stroke-linecap="round" fill="none"/>
+
+    <!-- Trailing arm -->
+    <path d="M190,182 L150,206 L114,196"
+          stroke="#E8881F" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Lead arm -->
+    <path d="M198,180 L248,178 L292,162"
+          stroke="#E8881F" stroke-width="20"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Trailing (tucked) leg -->
+    <path d="M214,250 L184,322 L250,344"
+          stroke="#FFAA2B" stroke-width="42"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Kicking leg — hero element -->
+    <path d="M214,250 L276,192 L342,140"
+          stroke="#FFAA2B" stroke-width="46"
+          stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+    <!-- Torso -->
+    <path d="M184,170 L214,250"
+          stroke="#FFAA2B" stroke-width="44"
+          stroke-linecap="round" fill="none"/>
+
+    <!-- Head -->
+    <circle cx="166" cy="138" r="29" fill="#FFAA2B"/>
+
+  </g>
+
+  <!-- ─── DIVIDER ────────────────────────────────────────────────────── -->
+  <line x1="468" y1="72" x2="468" y2="428"
+        stroke="#FFAA2B" stroke-width="1" stroke-opacity="0.20"/>
+
+  <!-- ─── TEXT (right side) ─────────────────────────────────────────── -->
+
+  <!-- Badge label: Korean martial art identifier -->
+  <text x="510" y="125"
+        font-family="'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+        font-size="13" font-weight="400"
+        letter-spacing="4"
+        fill="#FFAA2B" fill-opacity="0.45">결련택견</text>
+
+  <!-- Main title -->
+  <text x="506" y="222"
+        font-family="'Space Grotesk', 'Inter', 'Helvetica Neue', sans-serif"
+        font-size="88" font-weight="700"
+        letter-spacing="-2"
+        fill="#FFAA2B">Taekyun</text>
+
+  <text x="506" y="310"
+        font-family="'Space Grotesk', 'Inter', 'Helvetica Neue', sans-serif"
+        font-size="88" font-weight="700"
+        letter-spacing="-2"
+        fill="#FFAA2B" fill-opacity="0.55">Trainer</text>
+
+  <!-- Hairline rule -->
+  <line x1="506" y1="338" x2="920" y2="338"
+        stroke="#FFAA2B" stroke-width="1" stroke-opacity="0.22"/>
+
+  <!-- Korean app name -->
+  <text x="506" y="374"
+        font-family="'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif"
+        font-size="22" font-weight="500"
+        letter-spacing="2"
+        fill="#FFAA2B" fill-opacity="0.60">택견 트레이너</text>
+
+  <!-- Tagline -->
+  <text x="508" y="416"
+        font-family="'Space Mono', 'Courier New', monospace"
+        font-size="13" font-weight="400"
+        letter-spacing="3"
+        fill="#FFAA2B" fill-opacity="0.35">WATCH · REACT · FLOW</text>
+
+</svg>
