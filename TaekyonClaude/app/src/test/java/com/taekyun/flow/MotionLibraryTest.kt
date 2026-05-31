@@ -1,4 +1,4 @@
-package com.jtk.android.taekyonclaude
+package com.taekyun.flow
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

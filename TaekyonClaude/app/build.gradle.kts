@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.jtk.android.taekyonclaude"
+    namespace = "com.taekyun.flow"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.jtk.android.taekyonclaude"
+        applicationId = "com.taekyun.flow"
         minSdk = 29
         targetSdk = 36
         versionCode = 1

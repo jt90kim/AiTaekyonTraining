@@ -1,4 +1,4 @@
-package com.jtk.android.taekyonclaude
+package com.taekyun.flow
 
 import android.content.Intent
 import android.os.Bundle
@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.jtk.android.taekyonclaude.ui.theme.*
+import com.taekyun.flow.ui.theme.*
 
 private val SPLASH_DURATION_MS = 1500L
 

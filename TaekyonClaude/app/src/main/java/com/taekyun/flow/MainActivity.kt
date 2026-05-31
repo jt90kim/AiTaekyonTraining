@@ -1,4 +1,4 @@
-package com.jtk.android.taekyonclaude
+package com.taekyun.flow
 
 import android.content.Intent
 import android.os.Bundle
@@ -36,7 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
-import com.jtk.android.taekyonclaude.ui.theme.*
+import com.taekyun.flow.ui.theme.*
 import com.unity3d.player.UnityPlayer
 import com.unity3d.player.UnityPlayerGameActivity
 import kotlinx.coroutines.delay

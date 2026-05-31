@@ -1,4 +1,4 @@
-package com.jtk.android.taekyonclaude.ui.theme
+package com.taekyun.flow.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
