@@ -465,7 +465,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 544687601}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0.70711, z: 0, w: -0.70711}
+  m_LocalRotation: {x: 0, y: 0.64279, z: 0, w: -0.76604}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -645,8 +645,8 @@ MonoBehaviour:
   minIdleDuration: 0
   maxIdleDuration: 0
   blendToIdle: 0.3
-  movePlaybackSpeed: 1.5
-  transitionPlaybackSpeed: 3
+  movePlaybackSpeed: 1.2
+  transitionPlaybackSpeed: 2
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0

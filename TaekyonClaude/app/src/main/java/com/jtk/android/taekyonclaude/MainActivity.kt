@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -45,12 +46,14 @@ class MainActivity : UnityPlayerGameActivity() {
     private val _unityReady = mutableStateOf(false)
     private val _isPaused = mutableStateOf(false)
     private val _showExitDialog = mutableStateOf(false)
+    private val _countdownValue = mutableIntStateOf(-1) // -1: idle, 3→2→1→0: counting
     private val _durationSeconds = mutableIntStateOf(180)
     private val _sessionKey = mutableIntStateOf(0)
     private var _enabledMovesCsv = "roundhouse_low"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
         _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
 
@@ -73,6 +76,23 @@ class MainActivity : UnityPlayerGameActivity() {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (!_unityReady.value) return
+        if (_countdownValue.intValue > 0) {
+            // Reset countdown so it starts from 3 again when the user returns
+            _countdownValue.intValue = 3
+        } else if (!_isPaused.value) {
+            _isPaused.value = true
+            sendPaused(true)
+        }
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -82,15 +102,19 @@ class MainActivity : UnityPlayerGameActivity() {
         _isPaused.value = false
         _showExitDialog.value = false
         runOnUiThread {
-            _unityReady.value = true
+            _countdownValue.intValue = 3
             sendEnabledMoves()
+            sendPaused(true)
+            _unityReady.value = true
         }
     }
 
     fun onUnitySceneReady() {
         runOnUiThread {
-            _unityReady.value = true
+            _countdownValue.intValue = 3
             sendEnabledMoves()
+            sendPaused(true)
+            _unityReady.value = true
         }
     }
 
@@ -121,12 +145,14 @@ class MainActivity : UnityPlayerGameActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (_unityReady.value && !_showExitDialog.value) {
-                _isPaused.value = true
-                sendPaused(true)
-                _showExitDialog.value = true
-            } else if (!_unityReady.value) {
-                navigateBack()
+            when {
+                _countdownValue.intValue > 0 -> navigateBack()
+                _unityReady.value && !_showExitDialog.value -> {
+                    _isPaused.value = true
+                    sendPaused(true)
+                    _showExitDialog.value = true
+                }
+                !_unityReady.value -> navigateBack()
             }
             return true
         }
@@ -156,22 +182,33 @@ class MainActivity : UnityPlayerGameActivity() {
         var kickCount by remember { mutableIntStateOf(0) }
         val isPaused = _isPaused.value
         val showExitDialog = _showExitDialog.value
+        val countdownValue = _countdownValue.intValue
         val overTime = remainingSeconds <= 0
 
-        LaunchedEffect(unityReady, isPaused) {
-            if (!unityReady || isPaused) return@LaunchedEffect
+        LaunchedEffect(unityReady, isPaused, countdownValue) {
+            if (!unityReady || isPaused || countdownValue > 0) return@LaunchedEffect
             while (remainingSeconds > 0) {
                 delay(1000L)
                 remainingSeconds--
             }
         }
 
-        LaunchedEffect(unityReady, overTime, isPaused) {
-            if (!unityReady || overTime || isPaused) return@LaunchedEffect
+        LaunchedEffect(unityReady, overTime, isPaused, countdownValue) {
+            if (!unityReady || overTime || isPaused || countdownValue > 0) return@LaunchedEffect
             while (true) {
                 delay(1800L)
                 kickCount++
             }
+        }
+
+        // Tick the countdown; unpause Unity when it reaches 0
+        LaunchedEffect(countdownValue) {
+            if (countdownValue <= 0) return@LaunchedEffect
+            delay(1000L)
+            // Guard: onPause may have reset the value while we were waiting
+            if (_countdownValue.intValue != countdownValue) return@LaunchedEffect
+            _countdownValue.intValue = countdownValue - 1
+            if (countdownValue == 1) sendPaused(false)
         }
 
         // Auto-unpause when session ends so the mannequin keeps running under the card
@@ -324,8 +361,31 @@ class MainActivity : UnityPlayerGameActivity() {
                 }
             }
 
+            // Countdown overlay — 3, 2, 1 before training starts
+            AnimatedVisibility(
+                visible = unityReady && countdownValue > 0,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(600)),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(c.bg.copy(alpha = 0.60f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        countdownValue.toString(),
+                        fontFamily = SpaceGroteskFamily,
+                        fontSize = 120.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = c.fg,
+                        letterSpacing = (-0.04).em,
+                    )
+                }
+            }
+
             // Pause / resume pill — bottom center, amber for visibility over checkerboard
-            if (unityReady && !overTime) {
+            if (unityReady && !overTime && countdownValue <= 0) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)

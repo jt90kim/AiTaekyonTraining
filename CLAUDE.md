@@ -70,12 +70,12 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 
 | Setting | Value |
 |---|---|
-| Camera | Perspective, FOV 50, position (0, 1.5, -3), 5° downward tilt |
-| Skeleton root Y rotation | 270° (faces camera — natural facing is -X after facing correction; 270° maps -X → -Z toward camera) |
+| Camera | Perspective, FOV 50, position (0, 1.25, -3), 5° downward tilt |
+| Skeleton root Y rotation | 280° |
 | Move probability | 95% |
 | Idle duration | 0 (no pause between actions) |
-| Transition speed | 3× |
-| Move (kick) speed | 4× |
+| Transition speed | 2× |
+| Move (kick) speed | 1.5× |
 
 ### Visual system (MannequinRenderer.cs)
 
@@ -113,6 +113,7 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 - Anticipating state removed — Idling fires directly into `Fire()` when timer expires
 - After a kick, fighter transitions immediately to neutral (no idle pause)
 - Neutral stance passes through with timer=0 (fires instantly)
+- `Screen.sleepTimeout = SleepTimeout.NeverSleep` set in `AndroidBridge.Start()` — prevents screen dimming during Unity session
 
 ### Move type naming convention
 ```
@@ -126,7 +127,8 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 
 | Item | Status |
 |---|---|
-| `onUnitySceneReady()` callback | ✅ Wired — Unity calls Android when scene loads; Android starts timer after this |
+| `onUnitySceneReady()` callback | ✅ Wired — Unity calls Android when scene loads; Android freezes opponent and starts 3-second countdown, then unpauses |
+| `SetPaused(bool)` bridge | ✅ Wired — `UnitySendMessage("AndroidBridge","SetPaused","true"\|"false")` sets `Time.timeScale`; called on countdown end, pause button, exit dialog, and `onPause()` |
 | `SetEnabledMoves(csv)` bridge | ✅ Wired — Android sends CSV of enabled move type IDs; Unity state machine filters variants |
 | Move ID alignment | ✅ Confirmed — Android uses `roundhouse_low`, all 4 Unity `MoveVariant.moveType` fields are `roundhouse_low` |
 | `roundhouse_high` in Android catalog | ✅ 4 variants captured and wired in scene; marked Ready in MotionLibrary.kt |
@@ -142,8 +144,12 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 | **Internationalisation** | `res/values/strings.xml` (English) + `res/values-ko/strings.xml` (Korean). `MotionLibrary` uses `@StringRes` IDs; all composables use `stringResource()` |
 | **App icon** | Custom adaptive vector icon: amber kicking figure on dark brown `#100C08` background. Monochrome layer for Android 13+ themed icons |
 | **Splash screen delay** | `SPLASH_DELAY_MS = 1500L` in `LauncherActivity.kt` — "Begin training" button fades in after this delay. Use a plain `val` (not `const val`) so hot-swap picks up changes |
-
-**Next:** End-to-end device test. Verify session complete card, Korean locale strings, and icon appearance on device.
+| **3-second countdown** | After `onUnitySceneReady()`, Unity is paused and a full-screen "3 → 2 → 1" overlay counts down before the timer and opponent start |
+| **Pause button** | Bottom-center amber pill with icon + "Pause"/"Resume" text; visible only after countdown finishes; hidden on session end |
+| **Exit confirmation dialog** | Hardware back during training pauses Unity and shows "End training?" dialog; "Keep training" resumes; "End session" → setup screen |
+| **Auto-pause on background/lock** | `onPause()` pauses Unity and shows Resume button; screen lock during countdown resets countdown to 3; no auto-resume on return |
+| **Screen wake lock** | `FLAG_KEEP_SCREEN_ON` (Android) + `Screen.sleepTimeout = NeverSleep` (Unity) — screen stays on during training; manual power-button lock still works |
+| **Back navigation** | `moveTaskToBack(true)` instead of `finish()` — avoids Unity killing the process; setup screen back exits app normally |
 
 ## Non-Goals
 

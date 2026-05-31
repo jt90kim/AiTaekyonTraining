@@ -9,6 +9,8 @@ public class AndroidBridge : MonoBehaviour
 
     private void Start()
     {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+
         _player       = FindFirstObjectByType<MotionPlayer>();
         _stateMachine = FindFirstObjectByType<MotionStateMachine>();
         if (_player == null)
