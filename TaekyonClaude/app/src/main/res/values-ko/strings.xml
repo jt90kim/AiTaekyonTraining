@@ -5,13 +5,9 @@
     <string name="technique_roundhouse">후려차기</string>
     <string name="technique_splint">내차기</string>
 
-    <!-- Technique descriptions -->
-    <string name="technique_roundhouse_desc">정강이로 원을 그리며 쓸어차기 · 전신 회전</string>
-    <string name="technique_splint_desc">안쪽으로 쓸어올리는 동작 — 정강이가 중심선을 가로지름</string>
-
     <!-- Height labels -->
-    <string name="height_low">낮은</string>
-    <string name="height_high">높은</string>
+    <string name="height_low">하단</string>
+    <string name="height_high">상단</string>
 
     <!-- Splash screen -->
     <string name="splash_subtitle">택견 반응 훈련</string>

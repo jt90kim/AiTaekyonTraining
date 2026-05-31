@@ -424,7 +424,6 @@ private fun TechniqueCard(
                 Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = c.mute2, letterSpacing = 0.05.em)
             }
             Spacer(Modifier.height(6.dp))
-            Text(stringResource(tech.descResId), fontFamily = SpaceGroteskFamily, fontSize = 12.sp, color = c.mute, lineHeight = (12 * 1.4).sp)
             Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 tech.heights.forEach { height ->

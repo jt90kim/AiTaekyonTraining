@@ -17,7 +17,6 @@ data class TechniqueFamily(
     @StringRes val nameResId: Int,
     val hangul: String,
     val romaja: String,
-    @StringRes val descResId: Int,
     val status: Status,
     val heights: List<HeightVariant>,
 )
@@ -30,7 +29,6 @@ object MotionLibrary {
             nameResId = R.string.technique_roundhouse,
             hangul = "후려차기 / 돌려차기",
             romaja = "Huryeo-chagi / Dollyeo-chagi",
-            descResId = R.string.technique_roundhouse_desc,
             status = Status.Ready,
             heights = listOf(
                 HeightVariant("roundhouse_low",  R.string.height_low,  4, Status.Ready),
@@ -42,7 +40,6 @@ object MotionLibrary {
             nameResId = R.string.technique_splint,
             hangul = "내차기",
             romaja = "Nae-chagi",
-            descResId = R.string.technique_splint_desc,
             status = Status.Ready,
             heights = listOf(
                 HeightVariant("splint_low",  R.string.height_low,  4, Status.Ready),

@@ -5,10 +5,6 @@
     <string name="technique_roundhouse">Roundhouse</string>
     <string name="technique_splint">Splint Kick</string>
 
-    <!-- Technique descriptions -->
-    <string name="technique_roundhouse_desc">Circular sweep with the shin · whole-body rotation</string>
-    <string name="technique_splint_desc">Inward sweeping arc — shin travels across the centerline</string>
-
     <!-- Height labels -->
     <string name="height_low">Low</string>
     <string name="height_high">High</string>
