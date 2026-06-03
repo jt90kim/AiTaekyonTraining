@@ -26,6 +26,7 @@ public class MannequinRenderer : MonoBehaviour
         go.AddComponent<MeshFilter>().sharedMesh = _mesh;
 
         var mr  = go.AddComponent<MeshRenderer>();
+        mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         var baseMat = _materialTemplate != null
             ? _materialTemplate
             : new Material(Shader.Find("Universal Render Pipeline/Lit"));
@@ -307,8 +308,11 @@ public class MannequinRenderer : MonoBehaviour
         AddFlatTri(hr, fr, hl); AddFlatTri(hl, fr, fl);
         // Front
         AddFlatTri(fl + up, fr + up, fr); AddFlatTri(fl + up, fr, fl);
-        // Back
-        AddFlatTri(hr + up, hl + up, hl); AddFlatTri(hr + up, hl, hr);
+        // Back — pyramid from heel corners up to ankle, seals the leg-to-foot gap
+        AddFlatTri(hl + up, hr + up, ankle);
+        AddFlatTri(hr + up, hr,      ankle);
+        AddFlatTri(hr,      hl,      ankle);
+        AddFlatTri(hl,      hl + up, ankle);
         // Left side
         AddFlatTri(hl + up, hl, fl); AddFlatTri(hl + up, fl, fl + up);
         // Right side
@@ -319,22 +323,31 @@ public class MannequinRenderer : MonoBehaviour
 
     private void CreateFloorGrid(Shader shader)
     {
-        const int tiles = 8; const float tileSize = 0.5f;
-        var tex = new Texture2D(tiles, tiles, TextureFormat.RGB24, false) { filterMode = FilterMode.Point };
-        for (int x = 0; x < tiles; x++)
-            for (int z = 0; z < tiles; z++)
-                tex.SetPixel(x, z, (x + z) % 2 == 0 ? Color.white : Color.black);
-        tex.Apply();
-
         var go = GameObject.CreatePrimitive(PrimitiveType.Plane);
         go.name = "FloorGrid";
         Destroy(go.GetComponent<Collider>());
-        go.transform.localScale = Vector3.one * (tiles * tileSize / 10f);
+        go.transform.localScale = new Vector3(0.55f, 1f, 1.5f);
+
+        const int texW = 512, texH = 256;
+        var tex = new Texture2D(texW, texH, TextureFormat.RGB24, false) { filterMode = FilterMode.Bilinear };
+        var dark  = new Color(0.30f, 0.16f, 0.05f);
+        var light = new Color(0.46f, 0.28f, 0.10f);
+        for (int x = 0; x < texW; x++)
+            for (int y = 0; y < texH; y++)
+            {
+                float n = Mathf.PerlinNoise(x * 0.025f, y * 0.7f);
+                tex.SetPixel(x, y, Color.Lerp(dark, light, n));
+            }
+        tex.Apply();
 
         var mat = new Material(shader);
         mat.color = Color.white;
         mat.SetFloat("_Smoothness", 0f);
         mat.SetTexture("_BaseMap", tex);
-        go.GetComponent<MeshRenderer>().sharedMaterial = mat;
+        mat.SetTextureScale("_BaseMap", new Vector2(3f, 2f));
+        var floorMr = go.GetComponent<MeshRenderer>();
+        floorMr.sharedMaterial = mat;
+        floorMr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        floorMr.receiveShadows = false;
     }
 }
