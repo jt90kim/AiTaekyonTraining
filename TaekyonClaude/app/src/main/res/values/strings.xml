@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Taekyun Trainer</string>
+    <string name="app_name">Taekyun Flow</string>
 
     <!-- Technique names -->
     <string name="technique_roundhouse">Roundhouse</string>
@@ -12,7 +12,7 @@
     <!-- Splash screen -->
     <string name="splash_subtitle">Taekyun reaction drill</string>
     <string name="splash_about_label">About</string>
-    <string name="splash_about_body">Watch the opponent. React in real time.\nNo scoring. No pose tracking. Just rhythm.</string>
+    <string name="splash_about_body">Watch your partner. React in real time.</string>
     <string name="splash_begin">Begin training</string>
 
     <!-- Setup screen -->

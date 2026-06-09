@@ -113,6 +113,33 @@ private fun MonoLabel(text: String, color: Color? = null, size: Int = 10) {
     )
 }
 
+// ─── Partner intro card ─────────────────────────────────────────────────────
+
+@Composable
+private fun PartnerCard() {
+    val c = LocalTaekyonColors.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(c.surface)
+            .border(1.dp, c.line, RoundedCornerShape(18.dp))
+            .padding(horizontal = 18.dp, vertical = 16.dp)
+    ) {
+        Column {
+            MonoLabel(stringResource(R.string.splash_about_label), size = 10)
+            Spacer(Modifier.height(8.dp))
+            Text(
+                stringResource(R.string.splash_about_body),
+                fontFamily = SpaceGroteskFamily,
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
+                color = c.mute,
+            )
+        }
+    }
+}
+
 // ─── Setup ──────────────────────────────────────────────────────────────────
 
 @Composable
@@ -191,6 +218,8 @@ private fun SetupScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp, vertical = 20.dp),
         ) {
+            PartnerCard()
+            Spacer(Modifier.height(26.dp))
             DurationSection(seconds, onSecondsChange)
             Spacer(Modifier.height(26.dp))
             TechniquesSection(enabledMoves, onMovesChange)

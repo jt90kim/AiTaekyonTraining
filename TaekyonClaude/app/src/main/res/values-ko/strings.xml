@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">택견 트레이너</string>
+    <string name="app_name">택견 플로우</string>
 
     <!-- Technique names -->
     <string name="technique_roundhouse">후려차기</string>
@@ -12,7 +12,7 @@
     <!-- Splash screen -->
     <string name="splash_subtitle">택견 반응 훈련</string>
     <string name="splash_about_label">소개</string>
-    <string name="splash_about_body">상대방을 보세요. 실시간으로 반응하세요.\n점수 없음. 자세 추적 없음. 오직 리듬.</string>
+    <string name="splash_about_body">파트너를 보면서 실시간으로 반응하세요.</string>
     <string name="splash_begin">훈련 시작</string>
 
     <!-- Setup screen -->
@@ -32,7 +32,7 @@
     <string name="training_status_time_up">시간 초과</string>
     <string name="training_status_active">진행 중</string>
     <string name="training_status_loading">로딩 중…</string>
-    <string name="training_preparing">상대방 준비 중…</string>
+    <string name="training_preparing">파트너 준비 중…</string>
     <string name="training_kicks_label">차기</string>
     <string name="training_duration_stat">시간</string>
     <string name="training_kicks_stat">발차기 갯수</string>
