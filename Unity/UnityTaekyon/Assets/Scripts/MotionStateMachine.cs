@@ -63,10 +63,14 @@ public class MotionStateMachine : MonoBehaviour
             Debug.LogError("MotionStateMachine: MotionPlayer not found on this GameObject.");
             return;
         }
-        // Enable all configured move types by default so kicks fire in the Editor.
-        // Android overrides this at runtime via SetEnabledMoves().
+        // In the Editor, enable all configured types so kicks fire without Android.
+        // On Android, start empty — Android sends SetEnabledMoves before unpausing,
+        // and firing moves from the full default set during that startup window is the
+        // root cause of B1/B2/B3 (unselected move types appearing early in a session).
+#if !UNITY_ANDROID || UNITY_EDITOR
         foreach (var mv in moveVariants)
             if (mv.moveType != null) _enabledMoveTypes.Add(mv.moveType);
+#endif
 
         _currentStance = "neutral";
         _cycleIndex = 0;
