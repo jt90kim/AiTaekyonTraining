@@ -61,10 +61,13 @@ Unity ONLY plays back motion data — it never generates or synthesizes movement
 | 6 — Real Kicks | Capture kick clips via MediaPipe; wire into data-driven state machine | ✅ Done |
 | 7 — Visual Polish | Capsule renderer, color coding, floor grid, perspective camera | ✅ Done |
 | 8 — Android App Polish | Session complete card, dark/light theme, i18n (KO), app icon, splash delay | ✅ Done |
+| 9 — Clip Quality | Endpoint normalisation script; re-capture or normalise kick clips | 🔲 Planned |
 
 ## Current Status
 
-**All milestones complete.** The opponent runs autonomously, performs kicks continuously, and the scene renders cleanly. The Android shell is fully polished: themed UI, Korean localisation, session report card, and a custom app icon.
+**Milestones 1–8 complete.** The opponent runs autonomously, performs kicks continuously, and the scene renders cleanly. The Android shell is fully polished: themed UI, Korean localisation, session report card, and a custom app icon.
+
+**Known issue — motion jitter at clip boundaries.** Kick clips were filmed in isolation, so each clip starts and ends at a slightly different pose. The runtime blend (`blendIn`/`blendOut`) smooths small differences but cannot hide large pose gaps. Fix planned in Milestone 9 (see below).
 
 ### Scene configuration (SampleScene.unity)
 
@@ -114,6 +117,30 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 - After a kick, fighter transitions immediately to neutral (no idle pause)
 - Neutral stance passes through with timer=0 (fires instantly)
 - `Screen.sleepTimeout = SleepTimeout.NeverSleep` set in `AndroidBridge.Start()` — prevents screen dimming during Unity session
+- `MotionStateMachine._enabledMoveTypes` starts **empty** on Android builds (commit `4d62ed7`); all types were previously initialised by default, causing B1/B2/B3 (unselected move types firing in the startup race window before Android's `SetEnabledMoves` arrived)
+
+### Capture setup
+
+| Setting | Value |
+|---|---|
+| Device | Samsung Galaxy S24 |
+| Resolution / framerate | 1080p 120 fps (slow-motion) |
+| Camera angle | ~30° from head-on (slight front-diagonal) |
+| Distance | Full body in frame with ~0.5 m margin top and bottom |
+| Lighting | Bright, even — avoid shadows on kicking leg |
+
+### Milestone 9 — Clip endpoint normalisation
+
+**Root cause of jitter:** each kick clip was filmed independently, so its first and last frames are at whatever pose the practitioner happened to be in, not the canonical stance pose. The runtime blend covers small differences but not large pose gaps.
+
+**Approach:** offline Python script (`tools/normalize_clip.py`) that post-processes a clip's joint data:
+
+- **Head (first K frames):** lerp FROM the precondition stance idle pose → actual clip, so the clip always begins at the known source stance
+- **Tail (last K frames):** lerp FROM actual clip → `neutral_idle.json` frame 0, since the state machine always returns to neutral after a kick
+
+K ≈ 6–8 frames at 30 fps (0.2–0.25 s). The script takes three inputs: the move clip, the precondition idle clip (e.g. `left_forward_idle.json`), and the neutral idle clip.
+
+**Why not normalise to neutral at the head:** one stance (e.g. `left_forward`) is the precondition for multiple different kicks; the correct anchor at the clip start is the source stance idle pose, not neutral.
 
 ### Move type naming convention
 ```
@@ -129,7 +156,7 @@ Single procedural flat-shaded mesh rebuilt each frame from joint world positions
 |---|---|
 | `onUnitySceneReady()` callback | ✅ Wired — Unity calls Android when scene loads; Android freezes opponent and starts 3-second countdown, then unpauses |
 | `SetPaused(bool)` bridge | ✅ Wired — `UnitySendMessage("AndroidBridge","SetPaused","true"\|"false")` sets `Time.timeScale`; called on countdown end, pause button, exit dialog, and `onPause()` |
-| `SetEnabledMoves(csv)` bridge | ✅ Wired — Android sends CSV of enabled move type IDs; Unity state machine filters variants |
+| `SetEnabledMoves(csv)` bridge | ✅ Wired — Android sends CSV of enabled move type IDs; Unity state machine filters variants. Bug fix (4d62ed7): enabled set now starts empty on Android to prevent unselected types firing before the message arrives |
 | Move ID alignment | ✅ Confirmed — Android uses `roundhouse_low`, all 4 Unity `MoveVariant.moveType` fields are `roundhouse_low` |
 | `roundhouse_high` in Android catalog | ✅ 4 variants captured and wired in scene; marked Ready in MotionLibrary.kt |
 | `ReceiveMotionMessage` (direct JSON path) | 🗄️ Wired but unused — superseded by state machine |
