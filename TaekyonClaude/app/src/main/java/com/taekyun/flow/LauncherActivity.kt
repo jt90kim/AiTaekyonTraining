@@ -62,24 +62,22 @@ class LauncherActivity : ComponentActivity() {
         setContent {
             TaekyonClaudeTheme {
                 var seconds by rememberSaveable { mutableIntStateOf(60) }
-                var enabledMovesList by rememberSaveable { mutableStateOf(listOf("roundhouse_low")) }
-                var legRole by rememberSaveable { mutableStateOf("both") }
+                var enabledMovesList by rememberSaveable {
+                    mutableStateOf(listOf("roundhouse_low_front", "roundhouse_low_rear"))
+                }
                 val enabledMoves = enabledMovesList.toSet()
 
                 SetupScreen(
                     seconds = seconds,
                     enabledMoves = enabledMoves,
-                    legRole = legRole,
                     onSecondsChange = { seconds = it },
                     onMovesChange = { enabledMovesList = it.toList() },
-                    onLegRoleChange = { legRole = it },
                     onBack = { },
                     onStart = {
                         startActivity(
                             Intent(this, MainActivity::class.java).apply {
                                 putExtra("durationSeconds", seconds)
                                 putExtra("enabledMoves", enabledMoves.joinToString(","))
-                                putExtra("legRole", legRole)
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             }
                         )
@@ -150,10 +148,8 @@ private fun PartnerCard() {
 private fun SetupScreen(
     seconds: Int,
     enabledMoves: Set<String>,
-    legRole: String,
     onSecondsChange: (Int) -> Unit,
     onMovesChange: (Set<String>) -> Unit,
-    onLegRoleChange: (String) -> Unit,
     onBack: () -> Unit,
     onStart: () -> Unit,
 ) {
@@ -227,8 +223,6 @@ private fun SetupScreen(
             PartnerCard()
             Spacer(Modifier.height(26.dp))
             DurationSection(seconds, onSecondsChange)
-            Spacer(Modifier.height(26.dp))
-            LegRoleSection(legRole, onLegRoleChange)
             Spacer(Modifier.height(26.dp))
             TechniquesSection(enabledMoves, onMovesChange)
         }
@@ -359,49 +353,6 @@ private fun StepperButton(label: String, onClick: () -> Unit) {
     }
 }
 
-// ─── Leg role section ────────────────────────────────────────────────────────
-
-@Composable
-private fun LegRoleSection(legRole: String, onLegRoleChange: (String) -> Unit) {
-    val c = LocalTaekyonColors.current
-    val options = listOf(
-        Pair("front", R.string.leg_role_front),
-        Pair("both",  R.string.leg_role_both),
-        Pair("rear",  R.string.leg_role_rear),
-    )
-
-    MonoLabel(stringResource(R.string.leg_role_label), size = 11)
-    Spacer(Modifier.height(12.dp))
-
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        options.forEach { (value, labelRes) ->
-            val active = legRole == value
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(if (active) c.accent else c.surface)
-                    .border(1.dp, if (active) c.accent else c.line, RoundedCornerShape(12.dp))
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                    ) { onLegRoleChange(value) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    stringResource(labelRes),
-                    fontFamily = SpaceGroteskFamily,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (active) c.accentInk else c.fg,
-                    letterSpacing = (-0.01).em,
-                )
-            }
-        }
-    }
-}
-
 // ─── Techniques section ──────────────────────────────────────────────────────
 
 @Composable
@@ -455,7 +406,7 @@ private fun TechniqueCard(
     onMovesChange: (Set<String>) -> Unit,
 ) {
     val c = LocalTaekyonColors.current
-    val anyOn = tech.heights.any { it.id in enabledMoves }
+    val anyOn = tech.heights.any { h -> "${h.id}_front" in enabledMoves || "${h.id}_rear" in enabledMoves }
 
     if (tech.status != Status.Ready) {
         Row(
@@ -503,17 +454,89 @@ private fun TechniqueCard(
                 Text(tech.hangul, fontFamily = NotoSansKRFamily, fontSize = 13.sp, color = c.mute)
                 Text("· ${tech.romaja}", fontFamily = GeistMonoFamily, fontSize = 10.sp, color = c.mute2, letterSpacing = 0.05.em)
             }
-            Spacer(Modifier.height(6.dp))
             Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 tech.heights.forEach { height ->
-                    val on = height.id in enabledMoves
-                    HeightChip(height = height, on = on) {
-                        onMovesChange(if (on) enabledMoves - height.id else enabledMoves + height.id)
-                    }
+                    HeightRow(height = height, enabledMoves = enabledMoves, onMovesChange = onMovesChange)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HeightRow(
+    height: HeightVariant,
+    enabledMoves: Set<String>,
+    onMovesChange: (Set<String>) -> Unit,
+) {
+    val c = LocalTaekyonColors.current
+    val frontId = "${height.id}_front"
+    val rearId  = "${height.id}_rear"
+    val frontOn = frontId in enabledMoves
+    val rearOn  = rearId  in enabledMoves
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            stringResource(height.labelResId),
+            fontFamily = GeistMonoFamily,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            color = c.mute,
+            letterSpacing = 0.06.em,
+            modifier = Modifier.width(36.dp),
+        )
+        LegChip(
+            label = stringResource(R.string.leg_role_front),
+            on = frontOn,
+            enabled = height.status == Status.Ready,
+        ) { onMovesChange(if (frontOn) enabledMoves - frontId else enabledMoves + frontId) }
+        LegChip(
+            label = stringResource(R.string.leg_role_rear),
+            on = rearOn,
+            enabled = height.status == Status.Ready,
+        ) { onMovesChange(if (rearOn) enabledMoves - rearId else enabledMoves + rearId) }
+        if (height.status != Status.Ready) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .border(1.dp, c.line, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(stringResource(R.string.technique_soon_badge), fontFamily = GeistMonoFamily, fontSize = 9.sp, color = c.mute2, letterSpacing = 0.22.em)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LegChip(label: String, on: Boolean, enabled: Boolean, onToggle: () -> Unit) {
+    val c = LocalTaekyonColors.current
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (on) c.accent else Color.Transparent)
+            .border(1.dp, if (on) c.accent else if (enabled) c.lineStrong else c.line, RoundedCornerShape(10.dp))
+            .alpha(if (enabled) 1f else 0.5f)
+            .then(
+                if (enabled) Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) { onToggle() } else Modifier
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            label,
+            fontFamily = SpaceGroteskFamily,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (on) c.accentInk else if (enabled) c.fg else c.mute2,
+        )
     }
 }
 

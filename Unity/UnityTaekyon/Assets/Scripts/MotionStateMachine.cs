@@ -55,7 +55,6 @@ public class MotionStateMachine : MonoBehaviour
     private int             _cycleIndex;
     private float           _timer;
     private HashSet<string> _enabledMoveTypes = new HashSet<string>();
-    private HashSet<string> _enabledLegRoles  = new HashSet<string> { "front", "rear" };
 
     private void Start()
     {
@@ -101,20 +100,13 @@ public class MotionStateMachine : MonoBehaviour
         }
     }
 
-    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_low,splint_low")
+    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_low_front,roundhouse_low_rear")
+    // IDs are compound: {moveType}_{legRole}. Legacy flat IDs (no legRole suffix) still match any legRole.
     public void SetEnabledMoves(string csv)
     {
         _enabledMoveTypes = new HashSet<string>(
             csv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
         Debug.Log($"MotionStateMachine: enabled moves = [{string.Join(", ", _enabledMoveTypes)}]");
-    }
-
-    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", "front,rear")
-    public void SetEnabledLegRoles(string csv)
-    {
-        _enabledLegRoles = new HashSet<string>(
-            csv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
-        Debug.Log($"MotionStateMachine: enabled leg roles = [{string.Join(", ", _enabledLegRoles)}]");
     }
 
     private void ScheduleIdle()
@@ -132,8 +124,11 @@ public class MotionStateMachine : MonoBehaviour
             var candidates = new List<MoveVariant>();
             foreach (var mv in moveVariants)
             {
-                if (mv.clip != null && _enabledMoveTypes.Contains(mv.moveType) && mv.fromStance == _currentStance
-                    && (string.IsNullOrEmpty(mv.legRole) || _enabledLegRoles.Contains(mv.legRole)))
+                // Match compound ID "{moveType}_{legRole}" when legRole is set, else flat moveType.
+                string moveKey = string.IsNullOrEmpty(mv.legRole)
+                    ? mv.moveType
+                    : mv.moveType + "_" + mv.legRole;
+                if (mv.clip != null && _enabledMoveTypes.Contains(moveKey) && mv.fromStance == _currentStance)
                     candidates.Add(mv);
             }
 

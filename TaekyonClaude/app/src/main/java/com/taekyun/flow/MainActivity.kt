@@ -49,15 +49,13 @@ class MainActivity : UnityPlayerGameActivity() {
     private val _countdownValue = mutableIntStateOf(-1) // -1: idle, 3→2→1→0: counting
     private val _durationSeconds = mutableIntStateOf(180)
     private val _sessionKey = mutableIntStateOf(0)
-    private var _enabledMovesCsv = "roundhouse_low"
-    private var _legRoleCsv      = "front,rear"
+    private var _enabledMovesCsv = "roundhouse_low_front,roundhouse_low_rear"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
-        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
-        _legRoleCsv = intent.getStringExtra("legRole")?.legRoleToCsv() ?: "front,rear"
+        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low_front,roundhouse_low_rear"
 
         addContentView(
             ComposeView(this).apply {
@@ -99,15 +97,13 @@ class MainActivity : UnityPlayerGameActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
-        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
-        _legRoleCsv = intent.getStringExtra("legRole")?.legRoleToCsv() ?: "front,rear"
+        _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low_front,roundhouse_low_rear"
         _sessionKey.intValue++
         _isPaused.value = false
         _showExitDialog.value = false
         runOnUiThread {
             _countdownValue.intValue = 3
             sendEnabledMoves()
-            sendEnabledLegRoles()
             sendPaused(true)
             _unityReady.value = true
         }
@@ -117,7 +113,6 @@ class MainActivity : UnityPlayerGameActivity() {
         runOnUiThread {
             _countdownValue.intValue = 3
             sendEnabledMoves()
-            sendEnabledLegRoles()
             sendPaused(true)
             _unityReady.value = true
         }
@@ -128,14 +123,6 @@ class MainActivity : UnityPlayerGameActivity() {
             UnityPlayer.UnitySendMessage("AndroidBridge", "SetEnabledMoves", _enabledMovesCsv)
         } catch (e: Exception) {
             android.util.Log.w("MainActivity", "SetEnabledMoves failed: ${e.message}")
-        }
-    }
-
-    private fun sendEnabledLegRoles() {
-        try {
-            UnityPlayer.UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", _legRoleCsv)
-        } catch (e: Exception) {
-            android.util.Log.w("MainActivity", "SetEnabledLegRoles failed: ${e.message}")
         }
     }
 
@@ -179,12 +166,13 @@ class MainActivity : UnityPlayerGameActivity() {
 
     @Composable
     private fun moveLabelFor(id: String): String {
-        val family = MotionLibrary.techniques.firstOrNull { t -> t.heights.any { h -> h.id == id } }
-        val height = MotionLibrary.techniques.flatMap { it.heights }.firstOrNull { it.id == id }
+        val baseId = id.removeSuffix("_front").removeSuffix("_rear")
+        val family = MotionLibrary.techniques.firstOrNull { t -> t.heights.any { h -> h.id == baseId } }
+        val height = MotionLibrary.techniques.flatMap { it.heights }.firstOrNull { it.id == baseId }
         return if (family != null && height != null) {
             "${stringResource(family.nameResId)} ${stringResource(height.labelResId)}"
         } else {
-            id.split("_").joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
+            baseId.split("_").joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
         }
     }
 
@@ -705,4 +693,3 @@ class MainActivity : UnityPlayerGameActivity() {
     }
 }
 
-private fun String.legRoleToCsv(): String = if (this == "both") "front,rear" else this

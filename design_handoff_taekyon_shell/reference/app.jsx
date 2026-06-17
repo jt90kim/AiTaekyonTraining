@@ -9,7 +9,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 }/*EDITMODE-END*/;
 
 // Default selection — only roundhouse_low has captured clips right now.
-const DEFAULT_ENABLED = ['roundhouse_low'];
+const DEFAULT_ENABLED = ['roundhouse_low_front', 'roundhouse_low_rear'];
 
 // Phone-housed flow: Splash → Setup → Training. Each artboard mounts its own
 // instance so reviewers can compare states (e.g. setup vs training) side-by-side.
@@ -19,7 +19,6 @@ function TaekyonPhone({ mode, initialScreen = 'splash' }) {
   const [state, setState] = useStateApp({
     seconds: 60,
     enabledMoves: DEFAULT_ENABLED,
-    legRole: 'both',
   });
 
   useEffectApp(() => {

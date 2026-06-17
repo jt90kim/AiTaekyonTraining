@@ -265,7 +265,7 @@ function SplashScreen({ theme, onContinue }) {
 // ─────────────────────────────────────────────────────────────
 function SetupScreen({ theme, state, onChange, onStart, onBack }) {
   const sharp = theme.style.cornerStyle === 'sharp';
-  const { seconds, enabledMoves, legRole = 'both' } = state;
+  const { seconds, enabledMoves } = state;
   const enabled = new Set(enabledMoves);
   const canStart = enabled.size > 0;
 
@@ -274,7 +274,6 @@ function SetupScreen({ theme, state, onChange, onStart, onBack }) {
     if (next.has(id)) next.delete(id); else next.add(id);
     onChange({ ...state, enabledMoves: [...next] });
   };
-  const setLegRole = (r) => onChange({ ...state, legRole: r });
 
   return (
     <div style={{
@@ -324,7 +323,6 @@ function SetupScreen({ theme, state, onChange, onStart, onBack }) {
         position: 'relative', zIndex: 2,
       }}>
         <SectionDuration theme={theme} state={state} onChange={onChange} />
-        <SectionLegRole theme={theme} legRole={legRole} onLegRoleChange={setLegRole} />
         <SectionTechniques theme={theme} enabled={enabled} toggle={toggle} />
       </div>
 
@@ -447,51 +445,6 @@ function stepperBtn(theme) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SETUP · Leg role section
-// ─────────────────────────────────────────────────────────────
-function SectionLegRole({ theme, legRole, onLegRoleChange }) {
-  const sharp = theme.style.cornerStyle === 'sharp';
-  const options = [
-    { value: 'front', label: 'Front', kr: '앞발' },
-    { value: 'both',  label: 'Both',  kr: null   },
-    { value: 'rear',  label: 'Rear',  kr: '뒷발' },
-  ];
-  return (
-    <div style={{ marginBottom: 26 }}>
-      <Label theme={theme} size={11} style={{ marginBottom: 12, color: theme.c.mute }}>
-        {sharp ? '⟶ LEG ROLE' : 'Leg'}
-      </Label>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginTop: 12 }}>
-        {options.map(opt => {
-          const active = legRole === opt.value;
-          return (
-            <button key={opt.value} onClick={() => onLegRoleChange(opt.value)} style={{
-              height: 40,
-              background: active ? theme.c.accent : theme.c.surface,
-              color: active ? theme.c.accentInk : theme.c.fg,
-              border: `1px solid ${active ? theme.c.accent : theme.c.line}`,
-              borderRadius: sharp ? theme.radius.sm : theme.radius.md,
-              fontFamily: theme.fonts.sans,
-              fontSize: 13, fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 2,
-            }}>
-              <span>{sharp ? opt.label.toUpperCase() : opt.label}</span>
-              {opt.kr && <span style={{
-                fontFamily: theme.fonts.kr, fontSize: 10,
-                color: active ? theme.c.accentInk : theme.c.mute2,
-                opacity: 0.8,
-              }}>{opt.kr}</span>}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
 // SETUP · Techniques section
 // ─────────────────────────────────────────────────────────────
 function SectionTechniques({ theme, enabled, toggle }) {
@@ -554,7 +507,7 @@ function SectionTechniques({ theme, enabled, toggle }) {
 function TechniqueRow({ theme, tech, enabled, toggle, first }) {
   const sharp = theme.style.cornerStyle === 'sharp';
   const familyReady = tech.status === 'ready';
-  const anyOn = tech.heights.some(h => enabled.has(h.id));
+  const anyOn = tech.heights.some(h => enabled.has(`${h.id}_front`) || enabled.has(`${h.id}_rear`));
 
   // Compact row for not-yet-captured techniques.
   if (!familyReady) {
@@ -631,15 +584,53 @@ function TechniqueRow({ theme, tech, enabled, toggle, first }) {
         color: theme.c.mute, marginBottom: 12,
       }}>{tech.desc}</div>
 
-      {/* Height chips */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {/* Per-height front / rear chips */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {tech.heights.map(h => (
-          <HeightChip key={h.id} theme={theme}
-            chip={h} on={enabled.has(h.id)}
-            onToggle={() => h.status === 'ready' && toggle(h.id)}
-          />
+          <HeightRow key={h.id} theme={theme} chip={h} enabled={enabled} toggle={toggle} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function HeightRow({ theme, chip, enabled, toggle }) {
+  const sharp = theme.style.cornerStyle === 'sharp';
+  const frontId = `${chip.id}_front`;
+  const rearId  = `${chip.id}_rear`;
+  const ready   = chip.status === 'ready';
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{
+        width: 36, flexShrink: 0,
+        fontFamily: theme.fonts.mono, fontSize: 10,
+        color: theme.c.mute, letterSpacing: '0.06em',
+        textTransform: sharp ? 'uppercase' : 'none',
+      }}>
+        {sharp ? chip.label.toUpperCase() : chip.label}
+      </div>
+      {[{ id: frontId, label: '앞발' }, { id: rearId, label: '뒷발' }].map(opt => {
+        const on = enabled.has(opt.id);
+        return (
+          <button key={opt.id}
+            onClick={() => ready && toggle(opt.id)}
+            disabled={!ready}
+            style={{
+              all: 'unset',
+              cursor: ready ? 'pointer' : 'not-allowed',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              padding: '5px 12px',
+              background: on ? theme.c.accent : 'transparent',
+              color: on ? theme.c.accentInk : (ready ? theme.c.fg : theme.c.mute2),
+              border: `1px solid ${on ? theme.c.accent : (ready ? theme.c.lineStrong : theme.c.line)}`,
+              borderRadius: sharp ? theme.radius.sm : theme.radius.md,
+              fontFamily: theme.fonts.kr,
+              fontSize: 12, fontWeight: 600,
+              opacity: ready ? 1 : 0.5,
+            }}
+          >{opt.label}</button>
+        );
+      })}
     </div>
   );
 }

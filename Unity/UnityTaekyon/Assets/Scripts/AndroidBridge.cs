@@ -46,13 +46,6 @@ public class AndroidBridge : MonoBehaviour
         _stateMachine?.SetEnabledMoves(csv);
     }
 
-    // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", "front,rear")
-    public void SetEnabledLegRoles(string csv)
-    {
-        Debug.Log($"AndroidBridge: SetEnabledLegRoles '{csv}'");
-        _stateMachine?.SetEnabledLegRoles(csv);
-    }
-
     // Called by Android: UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)
     public void ReceiveMotionMessage(string json)
     {
