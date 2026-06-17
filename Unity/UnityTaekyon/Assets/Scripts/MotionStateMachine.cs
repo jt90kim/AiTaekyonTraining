@@ -124,10 +124,17 @@ public class MotionStateMachine : MonoBehaviour
             var candidates = new List<MoveVariant>();
             foreach (var mv in moveVariants)
             {
-                // Match compound ID "{moveType}_{legRole}" when legRole is set, else flat moveType.
-                string moveKey = string.IsNullOrEmpty(mv.legRole)
+                // Resolve leg role: Inspector field takes priority; fall back to clip filename.
+                string legRole = mv.legRole;
+                if (string.IsNullOrEmpty(legRole) && mv.clip != null)
+                {
+                    string n = mv.clip.name;
+                    if (n.Contains("_front")) legRole = "front";
+                    else if (n.Contains("_rear")) legRole = "rear";
+                }
+                string moveKey = string.IsNullOrEmpty(legRole)
                     ? mv.moveType
-                    : mv.moveType + "_" + mv.legRole;
+                    : mv.moveType + "_" + legRole;
                 if (mv.clip != null && _enabledMoveTypes.Contains(moveKey) && mv.fromStance == _currentStance)
                     candidates.Add(mv);
             }
