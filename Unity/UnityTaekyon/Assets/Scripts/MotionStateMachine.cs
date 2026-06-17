@@ -23,6 +23,7 @@ public class MoveVariant
 {
     public string    moveType;   // matches MoveType.id on Android, e.g. "roundhouse_kick"
     public string    fromStance; // "left_forward" or "right_forward" — never neutral
+    public string    legRole;    // "front" or "rear" — set in Inspector, matches clip filename
     public TextAsset clip;
     public float     blendIn  = 0.10f;
     public float     blendOut = 0.40f;
@@ -54,6 +55,7 @@ public class MotionStateMachine : MonoBehaviour
     private int             _cycleIndex;
     private float           _timer;
     private HashSet<string> _enabledMoveTypes = new HashSet<string>();
+    private HashSet<string> _enabledLegRoles  = new HashSet<string> { "front", "rear" };
 
     private void Start()
     {
@@ -99,12 +101,20 @@ public class MotionStateMachine : MonoBehaviour
         }
     }
 
-    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_kick,split_kick")
+    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_low,splint_low")
     public void SetEnabledMoves(string csv)
     {
         _enabledMoveTypes = new HashSet<string>(
             csv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
         Debug.Log($"MotionStateMachine: enabled moves = [{string.Join(", ", _enabledMoveTypes)}]");
+    }
+
+    // Called by AndroidBridge: UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", "front,rear")
+    public void SetEnabledLegRoles(string csv)
+    {
+        _enabledLegRoles = new HashSet<string>(
+            csv.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+        Debug.Log($"MotionStateMachine: enabled leg roles = [{string.Join(", ", _enabledLegRoles)}]");
     }
 
     private void ScheduleIdle()
@@ -122,7 +132,8 @@ public class MotionStateMachine : MonoBehaviour
             var candidates = new List<MoveVariant>();
             foreach (var mv in moveVariants)
             {
-                if (mv.clip != null && _enabledMoveTypes.Contains(mv.moveType) && mv.fromStance == _currentStance)
+                if (mv.clip != null && _enabledMoveTypes.Contains(mv.moveType) && mv.fromStance == _currentStance
+                    && (string.IsNullOrEmpty(mv.legRole) || _enabledLegRoles.Contains(mv.legRole)))
                     candidates.Add(mv);
             }
 

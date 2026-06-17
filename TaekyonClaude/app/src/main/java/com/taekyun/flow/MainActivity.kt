@@ -50,12 +50,14 @@ class MainActivity : UnityPlayerGameActivity() {
     private val _durationSeconds = mutableIntStateOf(180)
     private val _sessionKey = mutableIntStateOf(0)
     private var _enabledMovesCsv = "roundhouse_low"
+    private var _legRoleCsv      = "front,rear"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
         _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
+        _legRoleCsv = intent.getStringExtra("legRole")?.legRoleToCsv() ?: "front,rear"
 
         addContentView(
             ComposeView(this).apply {
@@ -98,12 +100,14 @@ class MainActivity : UnityPlayerGameActivity() {
         setIntent(intent)
         _durationSeconds.intValue = intent.getIntExtra("durationSeconds", 180)
         _enabledMovesCsv = intent.getStringExtra("enabledMoves") ?: "roundhouse_low"
+        _legRoleCsv = intent.getStringExtra("legRole")?.legRoleToCsv() ?: "front,rear"
         _sessionKey.intValue++
         _isPaused.value = false
         _showExitDialog.value = false
         runOnUiThread {
             _countdownValue.intValue = 3
             sendEnabledMoves()
+            sendEnabledLegRoles()
             sendPaused(true)
             _unityReady.value = true
         }
@@ -113,6 +117,7 @@ class MainActivity : UnityPlayerGameActivity() {
         runOnUiThread {
             _countdownValue.intValue = 3
             sendEnabledMoves()
+            sendEnabledLegRoles()
             sendPaused(true)
             _unityReady.value = true
         }
@@ -123,6 +128,14 @@ class MainActivity : UnityPlayerGameActivity() {
             UnityPlayer.UnitySendMessage("AndroidBridge", "SetEnabledMoves", _enabledMovesCsv)
         } catch (e: Exception) {
             android.util.Log.w("MainActivity", "SetEnabledMoves failed: ${e.message}")
+        }
+    }
+
+    private fun sendEnabledLegRoles() {
+        try {
+            UnityPlayer.UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", _legRoleCsv)
+        } catch (e: Exception) {
+            android.util.Log.w("MainActivity", "SetEnabledLegRoles failed: ${e.message}")
         }
     }
 
@@ -691,3 +704,5 @@ class MainActivity : UnityPlayerGameActivity() {
         }
     }
 }
+
+private fun String.legRoleToCsv(): String = if (this == "both") "front,rear" else this

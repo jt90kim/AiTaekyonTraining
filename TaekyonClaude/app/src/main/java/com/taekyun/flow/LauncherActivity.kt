@@ -63,19 +63,23 @@ class LauncherActivity : ComponentActivity() {
             TaekyonClaudeTheme {
                 var seconds by rememberSaveable { mutableIntStateOf(60) }
                 var enabledMovesList by rememberSaveable { mutableStateOf(listOf("roundhouse_low")) }
+                var legRole by rememberSaveable { mutableStateOf("both") }
                 val enabledMoves = enabledMovesList.toSet()
 
                 SetupScreen(
                     seconds = seconds,
                     enabledMoves = enabledMoves,
+                    legRole = legRole,
                     onSecondsChange = { seconds = it },
                     onMovesChange = { enabledMovesList = it.toList() },
+                    onLegRoleChange = { legRole = it },
                     onBack = { },
                     onStart = {
                         startActivity(
                             Intent(this, MainActivity::class.java).apply {
                                 putExtra("durationSeconds", seconds)
                                 putExtra("enabledMoves", enabledMoves.joinToString(","))
+                                putExtra("legRole", legRole)
                                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
                             }
                         )
@@ -146,8 +150,10 @@ private fun PartnerCard() {
 private fun SetupScreen(
     seconds: Int,
     enabledMoves: Set<String>,
+    legRole: String,
     onSecondsChange: (Int) -> Unit,
     onMovesChange: (Set<String>) -> Unit,
+    onLegRoleChange: (String) -> Unit,
     onBack: () -> Unit,
     onStart: () -> Unit,
 ) {
@@ -221,6 +227,8 @@ private fun SetupScreen(
             PartnerCard()
             Spacer(Modifier.height(26.dp))
             DurationSection(seconds, onSecondsChange)
+            Spacer(Modifier.height(26.dp))
+            LegRoleSection(legRole, onLegRoleChange)
             Spacer(Modifier.height(26.dp))
             TechniquesSection(enabledMoves, onMovesChange)
         }
@@ -348,6 +356,49 @@ private fun StepperButton(label: String, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         Text(label, fontFamily = GeistMonoFamily, fontSize = 11.sp, color = c.mute, letterSpacing = 0.04.em)
+    }
+}
+
+// ─── Leg role section ────────────────────────────────────────────────────────
+
+@Composable
+private fun LegRoleSection(legRole: String, onLegRoleChange: (String) -> Unit) {
+    val c = LocalTaekyonColors.current
+    val options = listOf(
+        Pair("front", R.string.leg_role_front),
+        Pair("both",  R.string.leg_role_both),
+        Pair("rear",  R.string.leg_role_rear),
+    )
+
+    MonoLabel(stringResource(R.string.leg_role_label), size = 11)
+    Spacer(Modifier.height(12.dp))
+
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        options.forEach { (value, labelRes) ->
+            val active = legRole == value
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(if (active) c.accent else c.surface)
+                    .border(1.dp, if (active) c.accent else c.line, RoundedCornerShape(12.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) { onLegRoleChange(value) },
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    stringResource(labelRes),
+                    fontFamily = SpaceGroteskFamily,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (active) c.accentInk else c.fg,
+                    letterSpacing = (-0.01).em,
+                )
+            }
+        }
     }
 }
 

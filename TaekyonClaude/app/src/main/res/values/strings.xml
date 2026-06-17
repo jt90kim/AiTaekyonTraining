@@ -28,6 +28,12 @@
     <string name="start_button">Start · %s</string>
     <string name="start_pick_variant">Pick at least one variant</string>
 
+    <!-- Leg role selector -->
+    <string name="leg_role_label">Leg</string>
+    <string name="leg_role_front">Front</string>
+    <string name="leg_role_both">Both</string>
+    <string name="leg_role_rear">Rear</string>
+
     <!-- Training overlay -->
     <string name="training_status_time_up">Time up</string>
     <string name="training_status_active">Active</string>

@@ -28,6 +28,12 @@
     <string name="start_button">시작 · %s</string>
     <string name="start_pick_variant">한개 이상의 기술을 선택하세요</string>
 
+    <!-- Leg role selector -->
+    <string name="leg_role_label">발</string>
+    <string name="leg_role_front">앞발</string>
+    <string name="leg_role_both">모두</string>
+    <string name="leg_role_rear">뒷발</string>
+
     <!-- Training overlay -->
     <string name="training_status_time_up">시간 초과</string>
     <string name="training_status_active">진행 중</string>

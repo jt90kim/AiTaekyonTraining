@@ -39,11 +39,18 @@ public class AndroidBridge : MonoBehaviour
         Debug.Log($"AndroidBridge: SetPaused {paused}");
     }
 
-    // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_kick,split_kick")
+    // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledMoves", "roundhouse_low,splint_low")
     public void SetEnabledMoves(string csv)
     {
         Debug.Log($"AndroidBridge: SetEnabledMoves '{csv}'");
         _stateMachine?.SetEnabledMoves(csv);
+    }
+
+    // Called by Android: UnitySendMessage("AndroidBridge", "SetEnabledLegRoles", "front,rear")
+    public void SetEnabledLegRoles(string csv)
+    {
+        Debug.Log($"AndroidBridge: SetEnabledLegRoles '{csv}'");
+        _stateMachine?.SetEnabledLegRoles(csv);
     }
 
     // Called by Android: UnityPlayer.UnitySendMessage("AndroidBridge", "ReceiveMotionMessage", json)
